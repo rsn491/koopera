@@ -1,7 +1,7 @@
 Koopera
 =========
 
-Koopera is a code review app that allows for adding comments to `.ipynb` notebooks
+Koopera is a code review app that allows for adding comments to `.ipynb` files
 in a Pull-request context.
 
 Note that this is a personal project that I initially started for playing with Vue.js and vanilla javascript.
