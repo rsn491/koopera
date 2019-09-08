@@ -1,20 +1,28 @@
 Koopera
 =========
 
-![](public/img/icon.png)
-
-**Koopera** is a code review app that allows for adding comments to `.ipynb` notebooks
+Koopera is a code review app that allows for adding comments to `.ipynb` notebooks
 in a Pull-request context.
 
-Note this is a personal project that I started to play with Vue.js and vanilla javascript, 
+Note that this is a personal project that I initially started with the goal to play with Vue.js and vanilla javascript, 
 and its functionality is limited.
 
 # Features
 * Add comments directly in notebooks cells
 * Github authentication via personal access token
 
+![demo](docs/demo.gif)
+
 # Quickstart
-You can easily start using Koopera installing from docker hub:
+You can easily start using Koopera with docker by running the
+cmds below:
+
+
+`$docker build -t koopera .`
+
+`$docker run -p 8080:8080 koopera`
+    
+The app can now be accessed at: [http://0.0.0.0:8080](http://0.0.0.0:8080)
 
 
 # Setting up dev environment
