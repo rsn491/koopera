@@ -1,8 +1,8 @@
 module.exports = {
-    outputDir: 'src/backend/static',
-	pages: {
-	    index: {
-	      entry: 'src/frontend/main.js',
-	  }
+  outputDir: 'src/backend/static',
+  pages: {
+    index: {
+      entry: 'src/frontend/main.js',
     },
-}
+  },
+};

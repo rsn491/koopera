@@ -1,5 +1,4 @@
 export default class UserCredentials {
-
   constructor(sourceControlAccessToken, apiAccessToken) {
     this.sourceControlAccessToken = sourceControlAccessToken;
     this.apiAccessToken = apiAccessToken;
@@ -8,5 +7,4 @@ export default class UserCredentials {
   isValid() {
     return !!this.sourceControlAccessToken && !!this.apiAccessToken;
   }
-
-};
+}

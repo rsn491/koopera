@@ -56,14 +56,14 @@ export default {
         Authorization: `Bearer ${userCredentials.apiAccessToken}`,
       },
     }).then((response) => {
-        if(response.status === 401) {
-          alert('please enable "user" scope for your personal access token!');
-          this.logout();
-        }
+      if (response.status === 401) {
+        alert('please enable "user" scope for your personal access token!');
+        this.logout();
+      }
 
-        response.json().then((json) => {
-          this.userName = json.name;
-          this.avatarUrl = json.avatarUrl;
+      response.json().then((json) => {
+        this.userName = json.name;
+        this.avatarUrl = json.avatarUrl;
       });
     });
   },

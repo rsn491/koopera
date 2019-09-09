@@ -4,7 +4,7 @@
       <div class='col-3 file-explorer-container text-left'>
         <h3>Files</h3>
         <div class='file-list'>
-          <Loader v-bind:show='files.length == 0' />
+          <Loader v-bind:show='files.length === 0' />
           <div v-for='file in files' v-bind:key='file.path'>
               <a v-bind:class="file.status === 'removed' ?
                 'btn alert alert-danger p-0 mb-1' :
@@ -44,19 +44,20 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.userCredentials.apiAccessToken}`,
+            Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
           },
           body: JSON.stringify({
-            'path': path,
-            'codeBlockId': codeBlockId,
-            'comment': comment,
+            path,
+            codeBlockId,
+            comment,
           }),
-        }).then(() => {
-          this.openedCodeComment.addComment(comment);
-          // register code block comment
-          this.fileComments[codeBlockId] = this.openedCodeComment;
-          this.openedCodeComment = null;
-          this.$forceUpdate();
+        },
+      ).then(() => {
+        this.openedCodeComment.addComment(comment);
+        // register code block comment
+        this.fileComments[codeBlockId] = this.openedCodeComment;
+        this.openedCodeComment = null;
+        this.$forceUpdate();
       });
     },
     getFile(path, ref, sha) {
@@ -78,7 +79,7 @@ export default {
     openComment(elementToAttach, codeBlockId) {
       // check if there is any comment currently opened
       if (this.openedCodeComment != null) {
-        if (this.openedCodeComment.parentElement == elementToAttach) {
+        if (this.openedCodeComment.parentElement === elementToAttach) {
           // ignore
           return;
         }
@@ -91,8 +92,7 @@ export default {
       if (!this.fileComments[codeBlockId]) {
         // first comment for this code block
         this.openedCodeComment = CodeComment.createNew(elementToAttach, codeBlockId);
-      }
-      else {
+      } else {
         this.fileComments[codeBlockId].open();
         this.openedCodeComment = this.fileComments[codeBlockId];
       }
@@ -106,7 +106,7 @@ export default {
         return;
       }
 
-      for(var i = 0; i < matches.length; i++) {
+      for (let i = 0; i < matches.length; i += 1) {
         const elementToAttach = matches[i];
         const codeBlockId = i;
         const codeBlockComments = codeCommentsForCurrentFile
@@ -153,7 +153,7 @@ export default {
       };
     }
 
-    this.attachCodeCommentHandlers(document.getElementsByClassName("inner_cell"));
+    this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
   },
   created() {
     if (!this.userCredentials.isValid()) {
@@ -174,8 +174,8 @@ export default {
 
         this.pullRequestComments = {};
         json.issueComments.forEach((issueComment) => {
-          const filePath = issueComment.filePath;
-          const codeBlockId = issueComment.codeBlockId;
+          const { filePath } = issueComment;
+          const { codeBlockId } = issueComment;
 
           if ((filePath in this.pullRequestComments) === false) {
             this.pullRequestComments[filePath] = {};
@@ -201,11 +201,16 @@ export default {
 
 <style>
 
+.inner_cell {
+  cursor: pointer;
+}
+
 .file-explorer-container {
   border-right: 1px solid var(--lighter);
 }
 
 .file-view-container {
+  cursor: default;
   overflow: auto;
   padding: 16px 32px;
 }
