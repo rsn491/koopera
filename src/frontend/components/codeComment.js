@@ -37,7 +37,7 @@ export default class CodeComment {
     return 'less than a minute ago';
   }
 
-  _getCommentsAsHtmlStr(comments) {
+  static _getCommentsAsHtmlStr(comments) {
     return comments.map(comment => `
       <div class='code-block-single-comment m-1'>
         <div class="col-12 code-comment-header">
@@ -52,7 +52,7 @@ export default class CodeComment {
     if (this.status === CODE_COMMENT_STATUS.OPENED) {
       return `
         <div class='container code-comment-container'>
-          ${this.comments.length > 0 ? this._getCommentsAsHtmlStr(this.comments) : ''}
+          ${this.comments.length > 0 ? CodeComment._getCommentsAsHtmlStr(this.comments) : ''}
           <div class="row">
             <div class="col-12">
               <textarea class="code-comment-text" value=""></textarea>
@@ -66,7 +66,7 @@ export default class CodeComment {
     }
 
     return `<div class='container code-comment-container code-comment--closed'>
-      ${this._getCommentsAsHtmlStr(this.comments)}
+      ${CodeComment._getCommentsAsHtmlStr(this.comments)}
       </div>`;
   }
 

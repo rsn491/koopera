@@ -1,9 +1,7 @@
 Koopera
 =========
 
-Koopera is a code review app for adding comments directly on `.ipynb` files.
-
-Note that this is a personal project that I initially started for playing with Vue.js and vanilla javascript.
+Koopera is a code review app for adding comments directly on `.ipynb` files
 
 # Features
 * Add comments directly in notebooks cells
@@ -12,13 +10,15 @@ Note that this is a personal project that I initially started for playing with V
 ![demo](docs/demo.gif)
 
 # Quickstart
-You can easily start using Koopera with docker by running the
-cmds below:
+You can easily start using Koopera with docker. You can get the image from [docker hub](https://hub.docker.com/r/rsn491/koopera) or build it from the source.
 
+If you want to build, please run the cmd below:
 
-`$docker build -t koopera .`
+`docker build -t koopera .`
 
-`$docker run -p 8080:8080 koopera`
+To start the app, please run the cmd below:
+
+`docker run -p 8080:8080 koopera`
     
 The app can now be accessed at: [http://0.0.0.0:8080](http://0.0.0.0:8080)
 
@@ -43,7 +43,7 @@ The app can now be accessed at: [http://0.0.0.0:8080](http://0.0.0.0:8080)
 
 4. Install dependencies
     
-    `pip install -r requirements`
+    `pip install -r requirements.txt`
 
 5. Start flask app on default port (5000)
 
