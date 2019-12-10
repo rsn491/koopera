@@ -4,8 +4,9 @@ Koopera
 Koopera is a code review app for adding comments directly on `.ipynb` files
 
 # Features
-* Add comments directly in notebooks cells
+* Add comments directly in notebooks cells for .ipynb files
 * Github authentication via personal access token
+* Add comments to python files
 
 ![demo](docs/demo.gif)
 
