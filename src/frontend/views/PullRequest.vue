@@ -73,13 +73,14 @@ export default {
           this.loadingFile = false;
           this.filePath = path;
           this.renderFileComments = true;
+          this.isIpynbFile = this.filePath.endsWith('.ipynb');  
         });
       });
     },
     openComment(elementToAttach, codeBlockId) {
       // check if there is any comment currently opened
       if (this.openedCodeComment != null) {
-        if (this.openedCodeComment.parentElement === elementToAttach) {
+        if (this.openedCodeComment.codeBlockId === codeBlockId) {
           // ignore
           return;
         }
@@ -91,13 +92,27 @@ export default {
       // check if there are already comments for this code block
       if (!this.fileComments[codeBlockId]) {
         // first comment for this code block
-        this.openedCodeComment = CodeComment.createNew(elementToAttach, codeBlockId);
+        this.openedCodeComment = CodeComment.createNew(
+          this.createContainerElement(elementToAttach, codeBlockId), codeBlockId);
       } else {
         this.fileComments[codeBlockId].open();
         this.openedCodeComment = this.fileComments[codeBlockId];
       }
 
       this.$forceUpdate();
+    },
+    createContainerElement(elementToAttach, codeBlockId) {
+      const containerElement = document.createElement('div');
+      containerElement.setAttribute('class', 'd-flex');
+
+      if(!this.isIpynbFile) {
+        const targetElement = document.getElementsByClassName('lineno')[codeBlockId + 1];
+        targetElement.parentElement.insertBefore(containerElement, targetElement);
+      }
+      else
+        elementToAttach.appendChild(containerElement);
+
+      return containerElement;
     },
     attachCodeCommentHandlers(matches) {
       const codeCommentsForCurrentFile = this.pullRequestComments[this.filePath];
@@ -114,9 +129,13 @@ export default {
 
         if (this.renderFileComments && !!codeBlockComments) {
           // has code block comment -> register and render!
+          const containerElement = this.createContainerElement(elementToAttach, codeBlockId);
           this.fileComments[codeBlockId] = CodeComment.createExisting(
-            elementToAttach, codeBlockId, codeBlockComments,
-          );
+            containerElement, codeBlockId, codeBlockComments);
+
+          if(!this.isIpynbFile) {
+            containerElement.onclick = () => this.openComment(elementToAttach, codeBlockId);
+          }
         }
 
         elementToAttach.onclick = () => this.openComment(elementToAttach, codeBlockId);
@@ -137,6 +156,7 @@ export default {
       commentToClose: null,
       pullRequestComments: {},
       fileComments: {},
+      isIpynbFile:  null
     };
   },
   updated() {
@@ -153,7 +173,10 @@ export default {
       };
     }
 
-    this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
+    if(this.isIpynbFile)
+      this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
+    else
+      this.attachCodeCommentHandlers(document.getElementsByClassName('lineno'));
   },
   created() {
     if (!this.userCredentials.isValid()) {
@@ -173,9 +196,8 @@ export default {
         this.files = json.files;
 
         this.pullRequestComments = {};
-        json.issueComments.forEach((issueComment) => {
-          const { filePath } = issueComment;
-          const { codeBlockId } = issueComment;
+        json.comments.forEach((comment) => {
+          const { filePath, codeBlockId } = comment;
 
           if ((filePath in this.pullRequestComments) === false) {
             this.pullRequestComments[filePath] = {};
@@ -186,9 +208,9 @@ export default {
           }
 
           this.pullRequestComments[filePath][codeBlockId].push({
-            author: issueComment.author,
-            comment: issueComment.body,
-            updatedAt: issueComment.updatedAt,
+            author: comment.author,
+            comment: comment.body,
+            updatedAt: comment.updatedAt,
           });
         });
       });
@@ -203,6 +225,18 @@ export default {
 
 .inner_cell {
   cursor: pointer;
+}
+
+.file-view-container .lineno:hover {
+  opacity: 0.6;
+  background-color: var(--darker);
+}
+
+.file-view-container span.lineno {
+  background-color: var(--dark);
+  cursor: pointer;
+  color: var(--lighter);
+  margin-right: 8px;
 }
 
 .file-explorer-container {
@@ -223,34 +257,43 @@ export default {
   background-color: #f8f9fa;
   border: 1px solid var(--dark);
   border-radius: 2px;
+  display: table;
   padding: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 .code-comment-text {
-  width: 100%;
-  resize: none;
+  display: table;
+  margin-top: 4px;
   overflow-y: auto;
   padding: 4px;
+  resize: none;
+  width: 100%;
 }
 
 .code-block-single-comment {
   background-color: white;
   border: 1px solid var(--dark);
   border-radius: 2px;
+  display: table;
+  margin-bottom: 8px;
   overflow-wrap: break-word;
+  width: 100%;
 }
 
 .code-comment-header {
   background-color: var(--normal);
   color: white;
+  display: flex;
   font-weight: bold;
+  justify-content: space-between;
   padding: 4px 8px;
 }
 
 .code-comment--closed {
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .code-comment--closed:hover {

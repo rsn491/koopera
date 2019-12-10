@@ -6,13 +6,11 @@ const CODE_COMMENT_STATUS = {
 export default class CodeComment {
   constructor(
     containerElement,
-    parentElement,
     codeBlockId,
     status,
     comments = [],
   ) {
     this.containerElement = containerElement;
-    this.parentElement = parentElement;
     this.codeBlockId = codeBlockId;
     this.status = status;
     this.comments = comments;
@@ -39,12 +37,12 @@ export default class CodeComment {
 
   static _getCommentsAsHtmlStr(comments) {
     return comments.map(comment => `
-      <div class='code-block-single-comment m-1'>
-        <div class="col-12 code-comment-header">
+      <div class='code-block-single-comment'>
+        <div class="code-comment-header">
           <span>${comment.author}</span>
           <span class="float-right">${CodeComment._timePassedFormatting(comment.updatedAt)}</span>
         </div>
-        <div class="col-12 code-comment-done-text">${comment.comment}</div>
+        <div class="code-comment-done-text">${comment.comment}</div>
       </div>`).join('');
   }
 
@@ -53,11 +51,11 @@ export default class CodeComment {
       return `
         <div class='container code-comment-container'>
           ${this.comments.length > 0 ? CodeComment._getCommentsAsHtmlStr(this.comments) : ''}
-          <div class="row">
-            <div class="col-12">
+          <div style="display: contents;">
+            <div class="d-table-row">
               <textarea class="code-comment-text" value=""></textarea>
             </div>
-            <div class="col-2">
+            <div class="d-table-row">
               <button class='save-code-comment-btn btn btn-light'>Save</button>
             </div>
           </div>
@@ -88,7 +86,7 @@ export default class CodeComment {
   close() {
     if (this.comments.length === 0) {
       // no comments in this code block -> just remove it from UI
-      this.parentElement.removeChild(this.containerElement);
+      this.containerElement.parentElement.removeChild(this.containerElement);
     } else {
       this.status = CODE_COMMENT_STATUS.CLOSED;
     }
@@ -99,13 +97,9 @@ export default class CodeComment {
     this.containerElement.innerHTML = this.template();
   }
 
-  static createNew(parentElement, codeBlockId) {
-    const containerElement = document.createElement('div');
-    parentElement.appendChild(containerElement);
-
+  static createNew(containerElement, codeBlockId) {
     const codeComment = new CodeComment(
       containerElement,
-      parentElement,
       codeBlockId,
       CODE_COMMENT_STATUS.OPENED,
     );
@@ -115,13 +109,9 @@ export default class CodeComment {
     return codeComment;
   }
 
-  static createExisting(parentElement, codeBlockId, comments) {
-    const containerElement = document.createElement('div');
-    parentElement.appendChild(containerElement);
-
+  static createExisting(containerElement, codeBlockId, comments) {
     const codeComment = new CodeComment(
       containerElement,
-      parentElement,
       codeBlockId,
       CODE_COMMENT_STATUS.CLOSED,
       comments,

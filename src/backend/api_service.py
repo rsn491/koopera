@@ -114,11 +114,11 @@ class APIService:
             code_repository: Repository = github.get_repo(full_name_or_id=int(code_repository_id))
             pull_request = code_repository.get_pull(number=int(pull_request_id))
 
-            code_comments = map(lambda issue_comment: CodeComment.from_github_issue_comment(
-                issue_comment), pull_request.get_issue_comments())
+            code_comments = map(lambda code_comment: CodeComment.from_github_code_comment(
+                    code_comment), pull_request.get_comments())
 
             return jsonify({
-                "issueComments": list(map(lambda code_comment: code_comment.__dict__,
+                "comments": list(map(lambda code_comment: code_comment.__dict__,
                                           filter(lambda code_comment: code_comment is not None, code_comments))),
                 "files": list(map(lambda file: {
                     "path": file.filename,
@@ -133,21 +133,25 @@ class APIService:
         @jwt_required
         def add_comment(code_repository_id, pull_request_id):
             body = request.json
-            file_path = body['path']
-            comment = body['comment']
-            code_block_id = body['codeBlockId']
 
             github = Github(get_jwt_identity())
+
+            code_comment = CodeComment(
+                file_path=body['path'],
+                code_block_id=body['codeBlockId'],
+                body=body['comment'],
+                author=github.get_user().name,
+                updated_at=datetime.utcnow())
+                
             code_repo: Repository = github.get_repo(int(code_repository_id))
             pull_request = code_repo.get_pull(number=int(pull_request_id))
+            commit = code_repo.get_commit(pull_request.head.sha)
 
-            pull_request.create_issue_comment(
-                body=CodeComment(
-                    file_path=file_path,
-                    code_block_id=code_block_id,
-                    body=comment,
-                    author=github.get_user().name,
-                    updated_at=datetime.utcnow()).to_github_issue_comment_body())
+            pull_request.create_comment(
+                code_comment.get_github_comment(), 
+                commit, 
+                code_comment.get_github_path(),
+                code_comment.get_github_position())
 
             return '', 200
 
@@ -170,7 +174,7 @@ class APIService:
                 (body, resources) = html_exporter.from_notebook_node(notebook)
             else:
                 lexer = get_lexer_by_name("python", stripall=True)
-                formatter = HtmlFormatter(linenos='inline', full=True, noclasses=True)
+                formatter = HtmlFormatter(linenos='inline', full=True, noclasses=False, nobackground=True, lineseparator="<br/>", classprefix='koopera-code-viewer')
                 body = highlight(file_content, lexer, formatter)
 
             return jsonify({
