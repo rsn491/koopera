@@ -1,6 +1,5 @@
 from typing import Optional
 from datetime import datetime
-from github.IssueComment import IssueComment
 from github.PullRequestComment import PullRequestComment
 
 

@@ -3,7 +3,6 @@ from flask import Flask, jsonify, send_from_directory
 from nbconvert import HTMLExporter
 from .config import JWT_SECRET_KEY, ALLOW_CORS
 from datetime import datetime
-from itertools import chain
 
 from src.backend.code_comment import CodeComment
 from pygments import highlight
