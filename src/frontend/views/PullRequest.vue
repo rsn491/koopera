@@ -73,7 +73,8 @@ export default {
           this.loadingFile = false;
           this.filePath = path;
           this.renderFileComments = true;
-          this.isIpynbFile = this.filePath.endsWith('.ipynb');  
+          this.fileComments = {};
+          this.isIpynbFile = this.filePath.endsWith('.ipynb');
         });
       });
     },
@@ -93,7 +94,8 @@ export default {
       if (!this.fileComments[codeBlockId]) {
         // first comment for this code block
         this.openedCodeComment = CodeComment.createNew(
-          this.createContainerElement(elementToAttach, codeBlockId), codeBlockId);
+          this.createContainerElement(elementToAttach, codeBlockId), codeBlockId
+        );
       } else {
         this.fileComments[codeBlockId].open();
         this.openedCodeComment = this.fileComments[codeBlockId];
@@ -105,12 +107,19 @@ export default {
       const containerElement = document.createElement('div');
       containerElement.setAttribute('class', 'd-flex');
 
-      if(!this.isIpynbFile) {
-        const targetElement = document.getElementsByClassName('lineno')[codeBlockId + 1];
-        targetElement.parentElement.insertBefore(containerElement, targetElement);
-      }
-      else
+      if (!this.isIpynbFile) {
+        const linenoElements = document.getElementsByClassName('lineno');
+
+        if (codeBlockId + 1 >= linenoElements.length) {
+          // comment in last line
+          elementToAttach.parentElement.appendChild(containerElement);
+        } else {
+          const targetElement = linenoElements[codeBlockId + 1];
+          targetElement.parentElement.insertBefore(containerElement, targetElement);
+        }
+      } else {
         elementToAttach.appendChild(containerElement);
+      }
 
       return containerElement;
     },
@@ -131,9 +140,10 @@ export default {
           // has code block comment -> register and render!
           const containerElement = this.createContainerElement(elementToAttach, codeBlockId);
           this.fileComments[codeBlockId] = CodeComment.createExisting(
-            containerElement, codeBlockId, codeBlockComments);
+            containerElement, codeBlockId, codeBlockComments
+          );
 
-          if(!this.isIpynbFile) {
+          if (!this.isIpynbFile) {
             containerElement.onclick = () => this.openComment(elementToAttach, codeBlockId);
           }
         }
@@ -156,7 +166,7 @@ export default {
       commentToClose: null,
       pullRequestComments: {},
       fileComments: {},
-      isIpynbFile:  null
+      isIpynbFile: null,
     };
   },
   updated() {
@@ -173,10 +183,11 @@ export default {
       };
     }
 
-    if(this.isIpynbFile)
+    if (this.isIpynbFile) {
       this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
-    else
+    } else {
       this.attachCodeCommentHandlers(document.getElementsByClassName('lineno'));
+    }
   },
   created() {
     if (!this.userCredentials.isValid()) {
