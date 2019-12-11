@@ -9,7 +9,7 @@ from pygments import highlight
 import base64
 from pygments.formatters.html import HtmlFormatter
 from typing import Iterable
-from pygments.lexers import get_lexer_by_name
+from pygments.lexers import guess_lexer_for_filename
 from flask import request
 from github import Github, Repository, NamedUser
 from flask_jwt_extended import (
@@ -173,7 +173,7 @@ class APIService:
                 notebook = nbformat.reads(file_content, as_version=4)
                 (body, resources) = html_exporter.from_notebook_node(notebook)
             else:
-                lexer = get_lexer_by_name("python", stripall=True)
+                lexer = guess_lexer_for_filename(file_path, '', stripall=True)
                 formatter = HtmlFormatter(linenos='inline', full=True, noclasses=False, nobackground=True, lineseparator="<br/>", classprefix='koopera-code-viewer')
                 body = highlight(file_content, lexer, formatter)
 
