@@ -462,12 +462,6 @@
   max-height: 340px;
   overflow-y: scroll;
 }
-.koopera-nb .container {
-  margin-right: auto;
-  margin-left: auto;
-  padding-left: 0px;
-  padding-right: 0px;
-}
 @media (min-width: 768px) {
   .container {
     width: 768px;
