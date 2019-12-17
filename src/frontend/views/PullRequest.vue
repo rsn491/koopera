@@ -17,7 +17,7 @@
       </div>
       <div class='col-9 file-view-container' >
         <Loader v-bind:show="loadingFile" />
-        <div :class="loadingFile && 'd-none'" v-html="fileDisplay"/>
+        <div :class="loadingFile ? 'd-none' : isIpynbFile && 'koopera-nb'" v-html="fileDisplay"/>
         <div/>
       </div>
     </div>
