@@ -1,7 +1,7 @@
 <template>
   <div class='container box-container'>
-    <div class='row m-2'>
-      <div class='col-8 offset-2 source-control-provider-image'/>
+    <div class='row m-2 source-control-provider'>
+      <div class='col-8 offset-2 github-image'/>
     </div>
 
     <div class='row m-2'>
@@ -59,14 +59,6 @@ export default {
 
 <style>
 
-.source-control-provider-image {
-  height: 120px;
-  background-size: contain;
-  background-position-x: center;
-  background-repeat: no-repeat;
-  background-image: url(https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-12-19/288981919427_f45f04edd92902a96859_512.png);
-}
-
 .access-token-input {
   border: 1px solid var(--dark);
   font-size: medium;
@@ -78,6 +70,10 @@ export default {
   font-size: medium;
   border-radius: 4px;
   border: 1px solid var(--dark);
+}
+
+.source-control-provider .github-image {
+  height: 120px;
 }
 
 </style>
