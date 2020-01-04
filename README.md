@@ -2,16 +2,19 @@ Koopera
 =========
 
 <img
-  src="public/img/icon_blue.png"
+  src="public/img/icon.png"
   alt="Koopera"
   width="200"
 />
 
-**Koopera** is a code review app for adding comments directly on `.ipynb` files
+**Koopera** is a collaboration app that enables Data Science teams to share and review their jupyter notebooks.
 
 # Features
-* Comment directly in jupyter notebook cells
-* Github authentication via personal access token
+* Review jupyter notebooks by commenting directly on its cells
+* Review source code with syntax highlight for python, scala, etc.
+* Import notebooks from your GitHub repositories
+* Navigate through your notebooks
+* GitHub authentication via personal access token
 
 # Screenshots
 
@@ -23,23 +26,22 @@ Koopera
 
 <kbd><img title="Review python code" src="docs/add_comments_to_python_file.png"></kbd><br/>
 
-**Demo**
+**Import and navigate through your notebooks**
 
-<kbd><img title="Demo" src="docs/demo.gif"></kbd><br/>
-
+<kbd><img title="Import and Navigate notebooks" src="docs/notebooks_import_navigate.gif"></kbd><br/>
 
 # Quickstart
-You can easily start using Koopera with docker. You can get the image from [docker hub](https://hub.docker.com/r/rsn491/koopera) or build it from the source.
+You can easily start using Koopera with docker in just two steps.
 
-If you want to build, please run the cmd below:
+1. Build and start Koopera + dependencies:
 
-`docker build -t koopera .`
+    `docker-compose up --build -d`
 
-To start the app, please run the cmd below:
+1. Run migrations:
 
-`docker run -p 8080:8080 koopera`
+    `docker-compose run --rm koopera alembic upgrade head`
 
-The app can now be accessed at: [http://0.0.0.0:8080](http://0.0.0.0:8080)
+When the migration ends, you can now access Koopera at: [http://0.0.0.0:8080](http://0.0.0.0:8080)
 
 
 # Setting up dev environment

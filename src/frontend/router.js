@@ -20,6 +20,21 @@ export default new Router({
       component: Login,
     },
     {
+      path: '/notebooks',
+      name: 'notebooks',
+      component: () => import('./views/notebooks/Notebooks.vue'),
+    },
+    {
+      path: '/notebooks/view/:notebookId',
+      name: 'notebook',
+      component: () => import('./views/notebooks/Notebook.vue'),
+    },
+    {
+      path: '/notebooks/import',
+      name: 'notebooksImport',
+      component: () => import('./views/notebooks/ImportNotebooks.vue'),
+    },
+    {
       path: '/coderepositories/:codeRepositoryId/pullrequests',
       name: 'pullRequests',
       component: () => import('./views/PullRequests.vue'),
