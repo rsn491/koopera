@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  koopera:
+    image: koopera:0.1.0
+    build: .
+    links:
+      - postgres:postgres
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URI=postgres+psycopg2://postgres:password@postgres:5432/koopera
+  postgres:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=koopera
+    expose:
+      - "5432"
+
+volumes:
+  postgres_data:

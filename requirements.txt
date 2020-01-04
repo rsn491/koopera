@@ -6,3 +6,7 @@ PyGithub==1.43.8
 Flask-Cors==3.0.7
 Flask-JWT==0.3.2
 flask-jwt-extended==3.21.0
+SQLAlchemy
+alembic
+psycopg2-binary
+pynliner

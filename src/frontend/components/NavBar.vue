@@ -1,17 +1,19 @@
 <template>
   <div id='nav' class='navbar'>
-    <div v-if='!!userName' class='col-6'>
+    <div v-if='!!userName' class='col-8'>
       <router-link
-        class='btn float-left'
+        class='btn float-left p-0 mr-2'
         to='/'>
-      Home
+        Home
+      </router-link>
+      <router-link
+        class='btn float-left p-0'
+        to='/notebooks'>
+        Notebooks
       </router-link>
     </div>
-    <div v-if='!!userName' class='row col-6 user-info-container'>
+    <div v-if='!!userName' class='col-4 user-info-container'>
       <Loader :show='!userName' />
-      <div class='user-name'>
-      {{ userName }}
-      </div>
       <div class='user-avatar'
         v-bind:style="{ 'background-image': 'url(' + avatarUrl + ')' }">
       </div>
@@ -85,23 +87,24 @@ export default {
 }
 
 .user-info-container {
+  display: flex;
   justify-content: flex-end;
 }
 
-.user-name {
-}
-
 .user-avatar {
-  margin-left: 8px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  height: 26px;
-  width: 26px;
+  border: 1px solid var(--dark);
+  border-radius: 8px;
+  display: inline-flex;
+  height: 32px;
+  margin: -4px;
+  width: 32px;
 }
 
 .user-logout-container {
-  margin-left: 8px;
+  display: inline-flex;
 }
 
 .navbar .btn  {

@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM nikolaik/python-nodejs:python3.8-nodejs13
 
 MAINTAINER Ricardo Neves "rsn_4_91@hotmail.com"
 
@@ -7,11 +7,6 @@ WORKDIR /app
 COPY . /app
 
 RUN pip install -r requirements.txt gunicorn
-
-RUN apt-get update
-RUN apt-get install curl -y
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
-RUN apt-get install nodejs -y
 RUN npm install
 RUN npm run build
 
