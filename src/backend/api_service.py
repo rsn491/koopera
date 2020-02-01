@@ -4,7 +4,6 @@ from nbconvert import HTMLExporter
 from .config import JWT_SECRET_KEY, ALLOW_CORS
 from datetime import datetime
 
-from src.backend.domain.code_comment import CodeComment
 from pygments import highlight
 import base64
 from pygments.formatters.html import HtmlFormatter

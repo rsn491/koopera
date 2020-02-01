@@ -36,8 +36,24 @@ export default {
   components: {
     Loader,
   },
+  data() {
+    return {
+      userCredentials: CredentialManager.load(),
+      loadingFile: false,
+      renderFileComments: false,
+      files: [],
+      filePath: '',
+      fileDisplay: '',
+      openedCodeComment: null,
+      pullRequestComments: {},
+      fileComments: {},
+      isIpynbFile: null,
+    };
+  },
   methods: {
-    addComment(path, codeBlockId, comment) {
+    addComment(codeComment, newComment) {
+      const { codeBlockId } = codeComment;
+
       fetch(
         getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/pullrequests/${this.$route.params.pullRequestNumber}/comment`),
         {
@@ -47,13 +63,13 @@ export default {
             Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
           },
           body: JSON.stringify({
-            path,
+            path: codeComment.path,
+            comment: newComment,
             codeBlockId,
-            comment,
           }),
         },
       ).then(() => {
-        this.openedCodeComment.addComment(comment);
+        this.openedCodeComment.addComment(newComment);
         // register code block comment
         this.fileComments[codeBlockId] = this.openedCodeComment;
         this.openedCodeComment = null;
@@ -94,7 +110,10 @@ export default {
       if (!this.fileComments[codeBlockId]) {
         // first comment for this code block
         this.openedCodeComment = CodeComment.createNew(
-          this.createContainerElement(elementToAttach, codeBlockId), codeBlockId
+          this.createContainerElement(elementToAttach, codeBlockId),
+          this.filePath,
+          codeBlockId,
+          this.addComment
         );
       } else {
         this.fileComments[codeBlockId].open();
@@ -140,7 +159,7 @@ export default {
           // has code block comment -> register and render!
           const containerElement = this.createContainerElement(elementToAttach, codeBlockId);
           this.fileComments[codeBlockId] = CodeComment.createExisting(
-            containerElement, codeBlockId, codeBlockComments
+            containerElement, this.filePath, codeBlockId, this.addComment, codeBlockComments,
           );
 
           if (!this.isIpynbFile) {
@@ -154,33 +173,9 @@ export default {
       this.renderFileComments = false;
     },
   },
-  data() {
-    return {
-      userCredentials: CredentialManager.load(),
-      loadingFile: false,
-      renderFileComments: false,
-      files: [],
-      filePath: '',
-      fileDisplay: '',
-      openedCodeComment: null,
-      commentToClose: null,
-      pullRequestComments: {},
-      fileComments: {},
-      isIpynbFile: null,
-    };
-  },
   updated() {
     if (this.loadingFile) {
       return;
-    }
-
-    const saveCodeCommentButtons = document.getElementsByClassName('save-code-comment-btn');
-
-    if (saveCodeCommentButtons.length > 0) {
-      saveCodeCommentButtons[0].onclick = () => {
-        const comment = document.getElementsByClassName('code-comment-text')[0].value;
-        this.addComment(this.filePath, this.openedCodeComment.codeBlockId, comment);
-      };
     }
 
     if (this.isIpynbFile) {

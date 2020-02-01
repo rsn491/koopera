@@ -6,13 +6,17 @@ const CODE_COMMENT_STATUS = {
 export default class CodeComment {
   constructor(
     containerElement,
+    path,
     codeBlockId,
     status,
+    addCommentCallback,
     comments = [],
   ) {
     this.containerElement = containerElement;
+    this.path = path;
     this.codeBlockId = codeBlockId;
     this.status = status;
+    this.addCommentCallback = addCommentCallback;
     this.comments = comments;
   }
 
@@ -46,6 +50,13 @@ export default class CodeComment {
       </div>`).join('');
   }
 
+  attachOnClickToSaveBtn() {
+    document.getElementsByClassName('save-code-comment-btn')[0].onclick = () => {
+      const comment = document.getElementsByClassName('code-comment-text')[0].value;
+      this.addCommentCallback(this, comment);
+    };
+  }
+
   template() {
     if (this.status === CODE_COMMENT_STATUS.OPENED) {
       return `
@@ -68,10 +79,10 @@ export default class CodeComment {
       </div>`;
   }
 
-  addComment(comment) {
+  addComment(newComment) {
     this.comments.push({
       author: 'Me',
-      comment,
+      comment: newComment,
       updatedAt: (Date.now() / 1000),
     });
     this.status = CODE_COMMENT_STATUS.CLOSED;
@@ -81,6 +92,7 @@ export default class CodeComment {
   open() {
     this.status = CODE_COMMENT_STATUS.OPENED;
     this.render();
+    this.attachOnClickToSaveBtn();
   }
 
   close() {
@@ -97,23 +109,28 @@ export default class CodeComment {
     this.containerElement.innerHTML = this.template();
   }
 
-  static createNew(containerElement, codeBlockId) {
+  static createNew(containerElement, path, codeBlockId, addCommentCallback) {
     const codeComment = new CodeComment(
       containerElement,
+      path,
       codeBlockId,
       CODE_COMMENT_STATUS.OPENED,
+      addCommentCallback,
     );
 
     codeComment.render();
+    codeComment.attachOnClickToSaveBtn();
 
     return codeComment;
   }
 
-  static createExisting(containerElement, codeBlockId, comments) {
+  static createExisting(containerElement, path, codeBlockId, addCommentCallback, comments) {
     const codeComment = new CodeComment(
       containerElement,
+      path,
       codeBlockId,
       CODE_COMMENT_STATUS.CLOSED,
+      addCommentCallback,
       comments,
     );
 
