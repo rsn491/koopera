@@ -3,7 +3,6 @@ from flask import Flask, jsonify, send_from_directory
 from nbconvert import HTMLExporter
 from nbconvert.preprocessors import Preprocessor
 from datetime import datetime
-from pynliner import Pynliner
 
 from src.backend.domain.code_comment import CodeComment
 from pygments import highlight
