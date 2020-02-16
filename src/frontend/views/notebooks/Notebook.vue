@@ -1,7 +1,7 @@
 <template>
   <div class='container box-container'>
     <Loader v-bind:show='loadingFile' />
-    <div class='col-9 file-view-container' >
+    <div class='file-view-container' >
       <div :class="loadingFile ? 'd-none' : 'koopera-nb'" v-html="fileDisplay"/>
     </div>
   </div>

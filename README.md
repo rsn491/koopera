@@ -66,7 +66,10 @@ When the migration ends, you can now access Koopera at: [http://0.0.0.0:8080](ht
 
     `pip install -r requirements.txt`
 
-5. Start flask app on default port (5000)
+5. Run migrations
+    `alembic upgrade head`
+
+6. Start flask app on default port (5000)
 
     `python run.py`
 

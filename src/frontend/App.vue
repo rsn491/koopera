@@ -49,6 +49,7 @@ body {
   background-color: white;
   border: 1px solid var(--dark);
   border-radius: 2px;
+  margin-top: 32px;
   padding: 24px 32px;
 }
 
@@ -61,6 +62,13 @@ body {
   background-position-x: center;
   background-repeat: no-repeat;
   background-image: url(https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-12-19/288981919427_f45f04edd92902a96859_512.png);
+}
+
+.koopera-image {
+  background-size: contain;
+  background-position-x: center;
+  background-repeat: no-repeat;
+  background-image: url(/img/icon.png);
 }
 
 </style>

@@ -52,7 +52,7 @@
       </div>
     </div>
     <div
-      :class="!fetchingNotebooks && !has_notebooks() ? 'col-12 text-center': 'd-none'">
+      :class="!fetchingNotebooks && !has_notebooks() ? 'no-notebooks-found': 'd-none'">
       <h3>No notebooks found...</h3>
       <div class="m-4">
         <div class="koopera-image"></div>
@@ -229,12 +229,12 @@ export default {
   cursor: pointer;
 }
 
-.koopera-image {
+.no-notebooks-found {
+  text-align: center
+}
+
+.no-notebooks-found .koopera-image {
   height: 200px;
-  background-size: contain;
-  background-position-x: center;
-  background-repeat: no-repeat;
-  background-image: url(/img/icon.png);
 }
 
 </style>

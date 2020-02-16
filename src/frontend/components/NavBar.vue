@@ -1,10 +1,10 @@
 <template>
   <div id='nav' class='navbar'>
-    <div v-if='!!userName' class='col-8'>
+    <div v-if='!!userName'>
       <router-link
         class='btn float-left p-0 mr-2'
         to='/'>
-        Home
+        <div class="koopera-image"></div>
       </router-link>
       <router-link
         class='btn float-left p-0'
@@ -12,7 +12,7 @@
         Notebooks
       </router-link>
     </div>
-    <div v-if='!!userName' class='col-4 user-info-container'>
+    <div v-if='!!userName'>
       <Loader :show='!userName' />
       <div class='user-avatar'
         v-bind:style="{ 'background-image': 'url(' + avatarUrl + ')' }">
@@ -76,19 +76,23 @@ export default {
 <style>
 
 #nav {
-  display: -webkit-box;
   background-color: var(--dark);
   color: white;
-  padding: 8px;
+  height: 48px;
+  padding: 0 1rem;
+  top: 0;
   width: 100%;
   z-index: 99;
-  height: 40px;
-  margin-bottom: 32px;
 }
 
-.user-info-container {
+.navbar >div {
+  align-items: center;
   display: flex;
-  justify-content: flex-end;
+  height: 100%;
+}
+
+.navbar .btn:hover {
+  opacity: 0.7;
 }
 
 .user-avatar {
@@ -97,19 +101,19 @@ export default {
   background-position: center;
   border: 1px solid var(--dark);
   border-radius: 8px;
-  display: inline-flex;
   height: 32px;
-  margin: -4px;
   width: 32px;
 }
 
-.user-logout-container {
-  display: inline-flex;
-}
-
 .navbar .btn  {
+  padding-bottom: 0;
   padding-top: 0;
   color: white;
+}
+
+.navbar .koopera-image {
+  height: 32px;
+  width: 32px;
 }
 
 </style>
