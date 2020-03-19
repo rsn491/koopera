@@ -52,5 +52,18 @@
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "babel": {
+    "presets": [
+      "@vue/app"
+    ]
+  },
+  "vue": {
+    "outputDir": "src/backend/static",
+    "pages": {
+      "index": {
+        "entry": "src/frontend/main.js"
+      }
+    }
+  }
 }
