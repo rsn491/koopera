@@ -5,7 +5,8 @@ from github.PullRequestComment import PullRequestComment
 
 class CodeComment:
 
-    def __init__(self, file_path: str, code_block_id: int, body: str, author: str, updated_at: datetime):
+    def __init__(self, file_path: str, code_block_id: int, body: str, author: str, updated_at: datetime, id: Optional[int] = None):
+        self.id = id
         self.filePath = file_path
         self.codeBlockId = code_block_id
         self.body = body
@@ -34,7 +35,7 @@ class CodeComment:
     @classmethod
     def from_github_code_comment(cls, code_comment: PullRequestComment):
         body = code_comment.body
-        
+
         if cls.is_ipynb_file(code_comment.path):
             separator_index = body.find(']')
             code_block_id = body[1: separator_index]
@@ -48,6 +49,7 @@ class CodeComment:
             code_block_id = code_comment.position - 1 if code_comment.position is not None else 1
 
         return CodeComment(
+            id=code_comment.id,
             file_path=code_comment.path,
             code_block_id=code_block_id,
             body=body,

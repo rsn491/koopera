@@ -51,7 +51,7 @@ export default {
     };
   },
   methods: {
-    addComment(codeComment, newComment) {
+    addComment(codeComment, newComment, inReplyToCommentId) {
       const { codeBlockId } = codeComment;
 
       fetch(
@@ -66,14 +66,17 @@ export default {
             path: codeComment.path,
             comment: newComment,
             codeBlockId,
+            inReplyToCommentId
           }),
         },
-      ).then(() => {
-        this.openedCodeComment.addComment(newComment);
-        // register code block comment
-        this.fileComments[codeBlockId] = this.openedCodeComment;
-        this.openedCodeComment = null;
-        this.$forceUpdate();
+      ).then((response) => {
+        response.json().then((json) => {
+          this.openedCodeComment.addComment(json.id, newComment);
+          // register code block comment
+          this.fileComments[codeBlockId] = this.openedCodeComment;
+          this.openedCodeComment = null;
+          this.$forceUpdate();
+        });
       });
     },
     getFile(path, ref, sha) {
@@ -214,6 +217,7 @@ export default {
           }
 
           this.pullRequestComments[filePath][codeBlockId].push({
+            id: comment.id,
             author: comment.author,
             comment: comment.body,
             updatedAt: comment.updatedAt,
