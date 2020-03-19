@@ -53,7 +53,10 @@ export default class CodeComment {
   attachOnClickToSaveBtn() {
     document.getElementsByClassName('save-code-comment-btn')[0].onclick = () => {
       const comment = document.getElementsByClassName('code-comment-text')[0].value;
-      this.addCommentCallback(this, comment);
+      const inReplyToCommentId = this.comments.length > 0
+        ? this.comments[this.comments.length - 1].id
+        : null;
+      this.addCommentCallback(this, comment, inReplyToCommentId);
     };
   }
 
@@ -79,8 +82,9 @@ export default class CodeComment {
       </div>`;
   }
 
-  addComment(newComment) {
+  addComment(id, newComment) {
     this.comments.push({
+      id,
       author: 'Me',
       comment: newComment,
       updatedAt: (Date.now() / 1000),

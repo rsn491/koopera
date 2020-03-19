@@ -79,6 +79,7 @@ def add_comment(code_repository_id, pull_request_id):
 
     github = Github(get_jwt_identity())
 
+    in_reply_to_comment_id = body['inReplyToCommentId']
     code_comment = CodeComment(
         file_path=body['path'],
         code_block_id=body['codeBlockId'],
@@ -88,15 +89,20 @@ def add_comment(code_repository_id, pull_request_id):
 
     code_repo: Repository = github.get_repo(int(code_repository_id))
     pull_request = code_repo.get_pull(number=int(pull_request_id))
-    commit = code_repo.get_commit(pull_request.head.sha)
 
-    pull_request.create_comment(
-        code_comment.get_github_comment(),
-        commit,
-        code_comment.get_github_path(),
-        code_comment.get_github_position())
+    if in_reply_to_comment_id:
+        created_comment = pull_request.create_review_comment_reply(in_reply_to_comment_id, code_comment.get_github_comment())
+    else:
+        commit = code_repo.get_commit(pull_request.head.sha)
+        created_comment = pull_request.create_comment(
+            code_comment.get_github_comment(),
+            commit,
+            code_comment.get_github_path(),
+            code_comment.get_github_position())
 
-    return '', 200
+    return jsonify({
+        'id': created_comment.id
+    })
 
 @code_repositories_blueprint.route('/coderepositories/<code_repository_id>/file')
 @jwt_required
