@@ -1,10 +1,36 @@
 <template>
   <div class='container box-container'>
-    <div class='row'>
-      <div class='col-3 file-explorer-container text-left'>
-        <h3>Files</h3>
+    <div :class="loadingPr ? 'd-none' : 'pr-header'">
+      <div class="pr-header__info">
+        <div class='pr-title'>
+          {{ title }}
+        </div>
+        <div class='author-avatar' :style="`background-image: url(${authorAvatarUrl})`"/>
+      </div>
+      <div class="pr-header__actions">
+        <div :class="showDescription ?
+          'pr-header__actions__action pr-header__actions__action--active' :
+          'pr-header__actions__action'"
+          v-on:click="() => this.showDescription = true">
+          <span class="material-icons" >subject</span>
+          Description
+        </div>
+        <div :class="showDescription ?
+          'pr-header__actions__action' :
+          'pr-header__actions__action pr-header__actions__action--active'"
+          v-on:click="() => this.showDescription = false">
+          <span class="material-icons">code</span>
+          Files ({{ files.length }})
+        </div>
+      </div>
+    </div>
+    <Loader v-bind:show="loadingPr" />
+    <div :class="loadingPr ? 'd-none' : 'row'">
+
+      <div class='col-12' v-if="showDescription" v-html="body"/>
+
+      <div class='col-3 file-explorer-container text-left' v-if="!showDescription">
         <div class='file-list'>
-          <Loader v-bind:show='files.length === 0' />
           <div v-for='file in files' v-bind:key='file.path'>
               <a v-bind:class="file.status === 'removed' ?
                 'btn alert alert-danger p-0 mb-1' :
@@ -15,10 +41,9 @@
           </div>
         </div>
       </div>
-      <div class='col-9 file-view-container' >
+      <div class='col-9 file-view-container' v-if="!showDescription">
         <Loader v-bind:show="loadingFile" />
         <div :class="loadingFile ? 'd-none' : isIpynbFile && 'koopera-nb'" v-html="fileDisplay"/>
-        <div/>
       </div>
     </div>
   </div>
@@ -40,7 +65,12 @@ export default {
     return {
       userCredentials: CredentialManager.load(),
       loadingFile: false,
+      loadingPr: true,
       renderFileComments: false,
+      title: null,
+      authorAvatarUrl: null,
+      body: null,
+      showDescription: true,
       files: [],
       filePath: '',
       fileDisplay: '',
@@ -202,7 +232,11 @@ export default {
       }
 
       response.json().then((json) => {
+        this.loadingPr = false;
         this.files = json.files;
+        this.title = json.title;
+        this.authorAvatarUrl = json.userAvatarUrl;
+        this.body = json.body;
 
         this.pullRequestComments = {};
         json.comments.forEach((comment) => {
@@ -313,6 +347,57 @@ export default {
 
 .code-comment-done-text {
   padding: 1px 8px;
+}
+
+.pr-header {
+  border-bottom: 1px solid var(--lighter);
+  margin-bottom: 24px;
+}
+
+.pr-header__info {
+  align-items: center;
+  display: flex;
+  margin-bottom: 18px;
+  padding: 0 4px;
+}
+
+.pr-header__actions {
+  display: flex;
+  font-weight: bold;
+  color: var(--dark);
+}
+
+.pr-header__actions__action {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  margin-right: 8px;
+  padding: 4px 2px;
+}
+
+.pr-header__actions__action--active {
+  border-bottom: 2px solid var(--darker);
+  color: var(--darker);
+  padding-bottom: 2px;
+}
+
+.pr-header__actions .material-icons {
+  margin-right: 2px;
+}
+
+.pr-header .pr-title {
+  color: var(--darker);
+  font-size: 24px;
+  flex-grow: 1;
+}
+
+.pr-header .author-avatar {
+  background-size: contain;
+  background-position-x: center;
+  height: 60px;
+  width: 60px;
+  background-repeat: no-repeat;
+  border-radius: 4px;
 }
 
 </style>

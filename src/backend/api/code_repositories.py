@@ -1,22 +1,22 @@
+import base64
+from datetime import datetime
+from typing import Iterable
+
 import nbformat
-from flask import Flask, jsonify, send_from_directory
+from flask import Blueprint, Flask, jsonify, request, send_from_directory
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                get_jwt_identity, jwt_required)
+from github import Github, Repository
 from nbconvert import HTMLExporter
 from nbconvert.preprocessors import Preprocessor
-from datetime import datetime
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import guess_lexer_for_filename
+
+import markdown
+from mdx_gfm import GithubFlavoredMarkdownExtension
 
 from src.backend.domain.code_comment import CodeComment
-from pygments import highlight
-import base64
-from pygments.formatters.html import HtmlFormatter
-from typing import Iterable
-from pygments.lexers import guess_lexer_for_filename
-from flask import request, Blueprint
-from github import Github, Repository
-from flask_jwt_extended import (
-    JWTManager, jwt_required,
-    create_access_token,
-    get_jwt_identity,
-)
 
 code_repositories_blueprint = Blueprint('code_repositories', __name__)
 
@@ -61,6 +61,9 @@ def get_pull_request(code_repository_id, pull_request_id):
             code_comment), pull_request.get_comments())
 
     return jsonify({
+        "title": pull_request.title,
+        "userAvatarUrl": pull_request.user.avatar_url,
+        "body": markdown.markdown(pull_request.body, extensions=[GithubFlavoredMarkdownExtension()]),
         "comments": list(map(lambda code_comment: code_comment.__dict__,
                                     filter(lambda code_comment: code_comment is not None, code_comments))),
         "files": list(map(lambda file: {
