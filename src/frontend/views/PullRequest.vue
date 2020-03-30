@@ -5,30 +5,61 @@
         <div class='pr-title'>
           {{ title }}
         </div>
-        <div class='author-avatar' :style="`background-image: url(${authorAvatarUrl})`"/>
+        <div>
+          <div class='author-avatar' :style="`background-image: url(${authorAvatarUrl})`"/>
+          <div :class="state === 'Open' ?
+            'pr-status pr-status--open' :
+            'pr-status'">
+            <span class='dot'/>
+            {{ state }}
+          </div>
+        </div>
       </div>
       <div class="pr-header__actions">
-        <div :class="showDescription ?
-          'pr-header__actions__action pr-header__actions__action--active' :
-          'pr-header__actions__action'"
-          v-on:click="() => this.showDescription = true">
-          <span class="material-icons" >subject</span>
-          Description
+        <div class="pr-header__links">
+          <div :class="showDescription ?
+            'pr-header__links__link pr-header__links__link--active' :
+            'pr-header__links__link'"
+            v-on:click="() => this.showDescription = true">
+            <span class="material-icons" >subject</span>
+            Description
+          </div>
+          <div :class="showDescription ?
+            'pr-header__links__link' :
+            'pr-header__links__link pr-header__links__link--active'"
+            v-on:click="() => this.showDescription = false">
+            <span class="material-icons">code</span>
+            Files ({{ files.length }})
+          </div>
         </div>
-        <div :class="showDescription ?
-          'pr-header__actions__action' :
-          'pr-header__actions__action pr-header__actions__action--active'"
-          v-on:click="() => this.showDescription = false">
-          <span class="material-icons">code</span>
-          Files ({{ files.length }})
+        <div class='pr-header__btns'>
+          <div :class="showMergeStrategies ?
+            'pr-header__btns__btn pr-header__btns__btn--active' :
+            'pr-header__btns__btn'"
+            v-on:click="() => showMergeStrategies = !showMergeStrategies">
+            <span class="material-icons" >done</span>
+            Merge
+          </div>
+          <div class='pr-merge-strategies' v-if=showMergeStrategies>
+            <div class='pr-merge-strategies__strategy'
+              v-on:click="() => merge('merge')">
+              Merge
+            </div>
+            <div class='pr-merge-strategies__strategy'
+              v-on:click="() => merge('squash')">
+              Squash
+            </div>
+            <div class='pr-merge-strategies__strategy'
+              v-on:click="() => merge('rebase')">
+              Rebase
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <Loader v-bind:show="loadingPr" />
     <div :class="loadingPr ? 'd-none' : 'row'">
-
       <div class='col-12' v-if="showDescription" v-html="body"/>
-
       <div class='col-3 file-explorer-container text-left' v-if="!showDescription">
         <div class='file-list'>
           <div v-for='file in files' v-bind:key='file.path'>
@@ -67,20 +98,46 @@ export default {
       loadingFile: false,
       loadingPr: true,
       renderFileComments: false,
-      title: null,
-      authorAvatarUrl: null,
-      body: null,
+      showMergeStrategies: false,
       showDescription: true,
       files: [],
       filePath: '',
       fileDisplay: '',
-      openedCodeComment: null,
       pullRequestComments: {},
       fileComments: {},
+      title: null,
+      state: null,
+      authorAvatarUrl: null,
+      body: null,
       isIpynbFile: null,
+      penedCodeComment: null,
     };
   },
   methods: {
+    merge(mergeStrategy) {
+      fetch(
+        getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/pullrequests/${this.$route.params.pullRequestNumber}/merge`),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
+          },
+          body: JSON.stringify({
+            mergeStrategy
+          }),
+        },
+      ).then((response) => {
+        this.showMergeStrategies = false;
+        this.state = 'Closed';
+
+        if (response.status !== 200) {
+          response.json().then((json) => {
+            alert(json.message);
+          });
+        }
+      });
+    },
     addComment(codeComment, newComment, inReplyToCommentId) {
       const { codeBlockId } = codeComment;
 
@@ -233,10 +290,12 @@ export default {
 
       response.json().then((json) => {
         this.loadingPr = false;
-        this.files = json.files;
-        this.title = json.title;
+
         this.authorAvatarUrl = json.userAvatarUrl;
         this.body = json.body;
+        this.state = json.state;
+        this.files = json.files;
+        this.title = json.title;
 
         this.pullRequestComments = {};
         json.comments.forEach((comment) => {
@@ -350,13 +409,10 @@ export default {
 }
 
 .pr-header {
-  border-bottom: 1px solid var(--lighter);
   margin-bottom: 24px;
 }
 
 .pr-header__info {
-  align-items: center;
-  display: flex;
   margin-bottom: 18px;
   padding: 0 4px;
 }
@@ -364,21 +420,51 @@ export default {
 .pr-header__actions {
   display: flex;
   font-weight: bold;
-  color: var(--dark);
+  border-bottom: 1px solid var(--lighter);
 }
 
-.pr-header__actions__action {
+.pr-header__links {
+  display: flex;
+  flex-grow: 1;
+}
+
+.pr-header__links__link {
   align-items: center;
+  color: var(--light);
   cursor: pointer;
   display: flex;
   margin-right: 8px;
   padding: 4px 2px;
 }
 
-.pr-header__actions__action--active {
-  border-bottom: 2px solid var(--darker);
-  color: var(--darker);
+.pr-header__links__link--active {
+  border-bottom: 2px solid var(--dark);
+  color: var(--dark);
   padding-bottom: 2px;
+}
+
+.pr-header__btns {
+  display: flex;
+  position: relative;
+}
+
+.pr-header__btns__btn {
+  align-items: center;
+  background-color: var(--lighter);
+  border: 1px solid var(--light);
+  border-radius: 4px;
+  color: var(--dark);
+  cursor: pointer;
+  display: flex;
+  padding: 4px 2px;
+}
+
+.pr-header__btns__btn--active {
+  color: var(--light);
+}
+
+.pr-header__btns__btn .material-icons {
+  color:  var(--success);
 }
 
 .pr-header__actions .material-icons {
@@ -388,7 +474,7 @@ export default {
 .pr-header .pr-title {
   color: var(--darker);
   font-size: 24px;
-  flex-grow: 1;
+  margin-bottom: 14px;
 }
 
 .pr-header .author-avatar {
@@ -398,6 +484,54 @@ export default {
   width: 60px;
   background-repeat: no-repeat;
   border-radius: 4px;
+}
+
+.pr-merge-strategies {
+  background-color: var(--lighter);
+  border: 1px solid var(--light);
+  border-radius: 4px;
+  height: 88px;
+  overflow: hidden;
+  position: absolute;
+  text-align: center;
+  top: 35px;
+  width: 80px;
+  z-index: 1;
+}
+
+.pr-merge-strategies__strategy {
+  color: var(--dark);
+  cursor: pointer;
+  border-bottom: 1px solid var(--light);
+  padding: 2px 4px;
+}
+
+.pr-merge-strategies__strategy:hover {
+  color: var(--darker);
+}
+
+.pr-status {
+  align-items: center;
+  color: var(--light);
+  display: flex;
+  margin-top: 8px;
+}
+
+.pr-status--open {
+  color: var(--success);
+}
+
+.pr-status .dot {
+  background-color: var(--light);
+  border-radius: 7px;
+  float: left;
+  height: 14px;
+  margin-right: 2px;
+  width: 14px;
+}
+
+.pr-status--open .dot {
+  background-color: var(--success);
 }
 
 </style>
