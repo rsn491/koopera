@@ -6,7 +6,7 @@ import nbformat
 from flask import Blueprint, Flask, jsonify, request, send_from_directory
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_identity, jwt_required)
-from github import Github, Repository
+from github import Github, Repository, GithubException
 from nbconvert import HTMLExporter
 from nbconvert.preprocessors import Preprocessor
 from pygments import highlight
@@ -64,6 +64,7 @@ def get_pull_request(code_repository_id, pull_request_id):
         "title": pull_request.title,
         "userAvatarUrl": pull_request.user.avatar_url,
         "body": markdown.markdown(pull_request.body, extensions=[GithubFlavoredMarkdownExtension()]),
+        "state": pull_request.state.capitalize(),
         "comments": list(map(lambda code_comment: code_comment.__dict__,
                                     filter(lambda code_comment: code_comment is not None, code_comments))),
         "files": list(map(lambda file: {
@@ -74,6 +75,24 @@ def get_pull_request(code_repository_id, pull_request_id):
             "sha": file.sha
         }, pull_request.get_files()))
     })
+
+@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/merge', methods=['POST'])
+@jwt_required
+def merge_pull_request(code_repository_id, pull_request_id):
+    github = Github(get_jwt_identity())
+    code_repository: Repository = github.get_repo(full_name_or_id=int(code_repository_id))
+    pull_request = code_repository.get_pull(number=int(pull_request_id))
+
+    merge_strategy = request.json['mergeStrategy']
+
+    try:
+        pull_request.merge(merge_method=merge_strategy)
+    except GithubException as exception:
+        return jsonify({
+            'message': exception.data['message']
+        }), 400
+
+    return '', 200
 
 @code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/comment', methods=['POST'])
 @jwt_required
