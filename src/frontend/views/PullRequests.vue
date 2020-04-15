@@ -1,5 +1,5 @@
 <template>
-  <div class="container box-container">
+  <div class="box-container">
     <Loader v-bind:show='!loaded' />
     <div class="col-12"
       v-for="pullRequest in pullRequests"
@@ -36,6 +36,7 @@
 import getAPIUrl from '../shared/getAPIUrl';
 import CredentialManager from '../shared/credentialManager';
 import Loader from '../components/Loader.vue';
+import store from '../store';
 
 export default {
   name: 'PullRequests',
@@ -65,6 +66,7 @@ export default {
       }
 
       response.json().then((json) => {
+        store.setCodeRepo(this.$route.params.codeRepositoryId, json.codeRepoName);
         this.pullRequests = json.pullRequests;
         this.loaded = true;
       });

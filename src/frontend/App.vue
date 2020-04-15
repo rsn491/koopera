@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <NavBar/>
-    <div>
-    <router-view/>
+    <div class='container'>
+      <SubNav/>
+      <router-view/>
     </div>
   </div>
 </template>
@@ -10,11 +11,13 @@
 <script>
 
 import NavBar from './components/NavBar.vue';
+import SubNav from './components/SubNav.vue';
 
 export default {
   name: 'App',
   components: {
     NavBar,
+    SubNav,
   },
 };
 
@@ -49,7 +52,6 @@ body {
   background-color: white;
   border: 1px solid var(--dark);
   border-radius: 2px;
-  margin-top: 32px;
   padding: 24px 32px;
 }
 

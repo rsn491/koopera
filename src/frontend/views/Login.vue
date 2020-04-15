@@ -1,5 +1,5 @@
 <template>
-  <div class='container box-container'>
+  <div class='login-container box-container'>
     <div class='row m-2 source-control-provider'>
       <div class='col-8 offset-2 github-image'/>
     </div>
@@ -58,6 +58,10 @@ export default {
 </script>
 
 <style>
+
+.login-container {
+  margin-top: 24px;
+}
 
 .access-token-input {
   border: 1px solid var(--dark);

@@ -1,5 +1,5 @@
 <template>
-  <div class='container box-container'>
+  <div class='box-container'>
     <Loader v-bind:show='!loaded' />
     <div class='col-12'
       v-for='codeRepository in codeRepositories'

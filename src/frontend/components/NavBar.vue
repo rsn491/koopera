@@ -106,9 +106,10 @@ export default {
 }
 
 .navbar .btn  {
+  color: white;
+  font-weight: 500;
   padding-bottom: 0;
   padding-top: 0;
-  color: white;
 }
 
 .navbar .koopera-image {

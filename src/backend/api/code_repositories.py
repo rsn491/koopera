@@ -42,6 +42,7 @@ def get_pull_requests(code_repository_id: int):
     code_repository = github.get_repo(full_name_or_id=int(code_repository_id))
 
     return jsonify({
+        "codeRepoName": code_repository.name,
         "pullRequests": list(map(lambda pull_request: {
             "id": pull_request.id,
             "number": pull_request.number,
@@ -62,6 +63,7 @@ def get_pull_request(code_repository_id, pull_request_id):
 
     return jsonify({
         "title": pull_request.title,
+        "codeRepoName": code_repository.name,
         "userAvatarUrl": pull_request.user.avatar_url,
         "body": markdown.markdown(pull_request.body, extensions=[GithubFlavoredMarkdownExtension()]),
         "state": pull_request.state.capitalize(),

@@ -1,5 +1,5 @@
 <template>
-  <div class='container box-container'>
+  <div class='box-container'>
     <Loader v-bind:show='fetchingNotebooks && !has_notebooks()' />
     <div :class="has_notebooks() ? 'mb-3 d-flex justify-content-end' : 'd-none'">
       <div class='refresh-notebooks-container'>

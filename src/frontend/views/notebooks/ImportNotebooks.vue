@@ -1,5 +1,5 @@
 <template>
-  <div class="container box-container">
+  <div class='box-container'>
     <div class="code-repos-container">
       <div class="d-flex mb-1">
         <input class="mr-2" type="checkbox"

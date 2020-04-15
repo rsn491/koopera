@@ -1,10 +1,10 @@
 <template>
-  <div class='container box-container'>
+  <div class='box-container'>
     <div :class="loadingPr ? 'd-none' : 'pr-header'">
       <div class="pr-header__info">
-        <div class='pr-title'>
+        <h1 class='pr-title'>
           {{ title }}
-        </div>
+        </h1>
         <div>
           <div class='author-avatar' :style="`background-image: url(${authorAvatarUrl})`"/>
           <div :class="state === 'Open' ?
@@ -86,6 +86,7 @@ import getAPIUrl from '../shared/getAPIUrl';
 import CredentialManager from '../shared/credentialManager';
 import Loader from '../components/Loader.vue';
 import CodeComment from '../components/codeComment';
+import store from '../store';
 
 export default {
   name: 'PullRequest',
@@ -290,7 +291,7 @@ export default {
 
       response.json().then((json) => {
         this.loadingPr = false;
-
+        store.setCodeRepo(this.$route.params.codeRepositoryId, json.codeRepoName);
         this.authorAvatarUrl = json.userAvatarUrl;
         this.body = json.body;
         this.state = json.state;
@@ -514,6 +515,7 @@ export default {
   align-items: center;
   color: var(--light);
   display: flex;
+  font-size: 14px;
   margin-top: 8px;
 }
 
