@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 CodeRepositoryBase = declarative_base()
 
+
 class CodeRepository(CodeRepositoryBase):
     __tablename__ = 'code_repositories'
 

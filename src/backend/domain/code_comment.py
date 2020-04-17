@@ -6,7 +6,13 @@ from github.PullRequestComment import PullRequestComment
 
 class CodeComment:
 
-    def __init__(self, file_path: str, code_block_id: int, body: str, author: str, updated_at: datetime, id: Optional[int] = None):
+    def __init__(self,
+                 file_path: str,
+                 code_block_id: int,
+                 body: str,
+                 author: str,
+                 updated_at: datetime,
+                 id: Optional[int] = None):
         self.id = id
         self.filePath = file_path
         self.codeBlockId = code_block_id
@@ -39,20 +45,19 @@ class CodeComment:
 
         if cls.is_ipynb_file(code_comment.path):
             separator_index = body.find(']')
-            code_block_id = body[1: separator_index]
+            code_block_id = body[1:separator_index]
 
             if code_block_id.isdigit() is False:
                 return None
 
             code_block_id = int(code_block_id)
-            body = body[separator_index + 2: body.__len__()]
+            body = body[separator_index + 2:body.__len__()]
         else:
             code_block_id = code_comment.position - 1 if code_comment.position is not None else 1
 
-        return CodeComment(
-            id=code_comment.id,
-            file_path=code_comment.path,
-            code_block_id=code_block_id,
-            body=body,
-            author=code_comment.user.name,
-            updated_at=code_comment.updated_at.timestamp())
+        return CodeComment(id=code_comment.id,
+                           file_path=code_comment.path,
+                           code_block_id=code_block_id,
+                           body=body,
+                           author=code_comment.user.name,
+                           updated_at=code_comment.updated_at.timestamp())

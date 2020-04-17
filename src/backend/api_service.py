@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_identity, jwt_optional, jwt_required)
-from github import Github, NamedUser
+from github import Github, NamedUser, BadCredentialsException
 
 from src.backend.api.code_repositories import CODE_REPOSITORIES_BLUEPRINT
 from src.backend.api.notebooks import NOTEBOOKS_BLUEPRINT
@@ -16,8 +17,6 @@ class APIService:
         app = Flask(__name__)
 
         if ALLOW_CORS:
-            from flask_cors import CORS
-
             CORS(app, resources={r'/*': {'origins': '*'}})
 
         app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
@@ -46,7 +45,7 @@ class APIService:
 
             try:
                 github.get_user().login
-            except:
+            except BadCredentialsException:
                 return '', 401
 
             access_token = create_access_token(identity=personal_access_token)

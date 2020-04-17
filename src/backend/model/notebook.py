@@ -6,6 +6,7 @@ from src.backend.model.code_repository import CodeRepository
 
 NotebookBase = declarative_base()
 
+
 class Notebook(NotebookBase):
     __tablename__ = 'notebooks'
 

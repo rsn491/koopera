@@ -12,21 +12,26 @@ SESSION = sessionmaker(create_engine(DATABASE_URI))
 
 NOTEBOOKS_BLUEPRINT = Blueprint('notebooks', __name__)
 
+
 @NOTEBOOKS_BLUEPRINT.route('/notebooks')
 @jwt_required
 def get_all_notebooks():
     session = SESSION()
 
     return jsonify({
-        "notebooks": list(map(lambda notebook: {
-            'id': notebook.id,
-            'title': notebook.title,
-            'summary': notebook.summary,
-            'sha': notebook.sha,
-            'repoId': notebook.code_repo_id,
-            'repoName': notebook.code_repo.name
-        }, session.query(Notebook).all()))
+        "notebooks": list(
+            map(
+                lambda notebook: {
+                    'id': notebook.id,
+                    'title': notebook.title,
+                    'summary': notebook.summary,
+                    'sha': notebook.sha,
+                    'repoId': notebook.code_repo_id,
+                    'repoName': notebook.code_repo.name
+                },
+                session.query(Notebook).all()))
     })
+
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>')
 @jwt_required
@@ -38,7 +43,10 @@ def get_notebook(notebook_id):
     if notebook is None:
         return jsonify({}), 404
 
-    return redirect(f'/api/coderepositories/{notebook.code_repo_id}/file?path={notebook.path}&sha={notebook.sha}')
+    return redirect(
+        f'/api/coderepositories/{notebook.code_repo_id}/file?path={notebook.path}&sha={notebook.sha}'
+    )
+
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>', methods=['DELETE'])
 @jwt_required
@@ -50,11 +58,12 @@ def delete_notebook(notebook_id):
 
     return jsonify({})
 
+
 @NOTEBOOKS_BLUEPRINT.route('/notebooks', methods=['POST'])
 @jwt_required
 def import_notebooks():
     session = SESSION()
-    body = request.json if request.data  else None
+    body = request.json if request.data else None
 
     github = Github(get_jwt_identity())
 
@@ -73,30 +82,33 @@ def import_notebooks():
     notebooks_updated = 0
 
     for owner in code_repos_owners:
-        notebooks = filter(lambda notebook: notebook.repository.id in code_repos_ids,
+        notebooks = filter(
+            lambda notebook: notebook.repository.id in code_repos_ids,
             github.search_code(f'user:{owner} extension:ipynb'))
 
         for notebook in notebooks:
             notebook_db = session.query(Notebook).filter(
-                Notebook.path == notebook.path and Notebook.code_repo_id == notebook.repository.id).first()
+                Notebook.path == notebook.path and
+                Notebook.code_repo_id == notebook.repository.id).first()
 
             if notebook_db:
                 notebook_db.sha = notebook.sha
                 notebooks_updated += 1
             else:
-                if session.query(CodeRepository).get(notebook.repository.id) is None:
+                if session.query(CodeRepository).get(
+                        notebook.repository.id) is None:
                     # create repo
-                    session.add(CodeRepository(
-                        id=notebook.repository.id,
-                        name=notebook.repository.name,
-                        owner=owner))
+                    session.add(
+                        CodeRepository(id=notebook.repository.id,
+                                       name=notebook.repository.name,
+                                       owner=owner))
 
-                session.add(Notebook(
-                    code_repo_id=notebook.repository.id,
-                    sha=notebook.sha,
-                    path=notebook.path,
-                    title=notebook.name,
-                    summary=''))
+                session.add(
+                    Notebook(code_repo_id=notebook.repository.id,
+                             sha=notebook.sha,
+                             path=notebook.path,
+                             title=notebook.name,
+                             summary=''))
                 notebooks_added += 1
 
     session.commit()
