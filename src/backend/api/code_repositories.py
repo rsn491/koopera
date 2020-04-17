@@ -2,25 +2,22 @@ import base64
 from datetime import datetime
 from typing import Iterable
 
+import markdown
 import nbformat
-from flask import Blueprint, Flask, jsonify, request, send_from_directory
-from flask_jwt_extended import (JWTManager, create_access_token,
-                                get_jwt_identity, jwt_required)
-from github import Github, Repository, GithubException
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from github import Github, GithubException, Repository
+from mdx_gfm import GithubFlavoredMarkdownExtension
 from nbconvert import HTMLExporter
-from nbconvert.preprocessors import Preprocessor
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import guess_lexer_for_filename
 
-import markdown
-from mdx_gfm import GithubFlavoredMarkdownExtension
-
 from src.backend.domain.code_comment import CodeComment
 
-code_repositories_blueprint = Blueprint('code_repositories', __name__)
+CODE_REPOSITORIES_BLUEPRINT = Blueprint('code_repositories', __name__)
 
-@code_repositories_blueprint.route('/coderepositories')
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories')
 @jwt_required
 def get_code_repositories():
     github = Github(get_jwt_identity())
@@ -35,7 +32,7 @@ def get_code_repositories():
         }, code_repos))
     })
 
-@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests')
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/pullrequests')
 @jwt_required
 def get_pull_requests(code_repository_id: int):
     github = Github(get_jwt_identity())
@@ -51,7 +48,7 @@ def get_pull_requests(code_repository_id: int):
         }, code_repository.get_pulls().get_page(0)))
     })
 
-@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>')
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>')
 @jwt_required
 def get_pull_request(code_repository_id, pull_request_id):
     github = Github(get_jwt_identity())
@@ -78,7 +75,7 @@ def get_pull_request(code_repository_id, pull_request_id):
         }, pull_request.get_files()))
     })
 
-@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/merge', methods=['POST'])
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/merge', methods=['POST'])
 @jwt_required
 def merge_pull_request(code_repository_id, pull_request_id):
     github = Github(get_jwt_identity())
@@ -96,7 +93,7 @@ def merge_pull_request(code_repository_id, pull_request_id):
 
     return '', 200
 
-@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/comment', methods=['POST'])
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/comment', methods=['POST'])
 @jwt_required
 def add_comment(code_repository_id, pull_request_id):
     body = request.json
@@ -128,7 +125,7 @@ def add_comment(code_repository_id, pull_request_id):
         'id': created_comment.id
     })
 
-@code_repositories_blueprint.route('/coderepositories/<code_repository_id>/file')
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/file')
 @jwt_required
 def get_file(code_repository_id):
     file_path = request.args.get("path")
@@ -144,7 +141,7 @@ def get_file(code_repository_id):
         html_exporter = HTMLExporter()
         html_exporter.template_file = 'basic'
         notebook = nbformat.reads(file_content, as_version=4)
-        (body, resources) = html_exporter.from_notebook_node(notebook)
+        (body, _) = html_exporter.from_notebook_node(notebook)
     else:
         lexer = guess_lexer_for_filename(file_path, '', stripall=True)
         formatter = HtmlFormatter(linenos='inline', full=True, noclasses=False, nobackground=True, lineseparator="<br/>", classprefix='koopera-code-viewer')

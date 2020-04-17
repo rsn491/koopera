@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, redirect, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from github import Github, Repository
+from github import Github
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -8,14 +8,14 @@ from src.backend.config import DATABASE_URI
 from src.backend.model.code_repository import CodeRepository
 from src.backend.model.notebook import Notebook
 
-Session = sessionmaker(create_engine(DATABASE_URI))
+SESSION = sessionmaker(create_engine(DATABASE_URI))
 
-notebooks_blueprint = Blueprint('notebooks', __name__)
+NOTEBOOKS_BLUEPRINT = Blueprint('notebooks', __name__)
 
-@notebooks_blueprint.route('/notebooks')
+@NOTEBOOKS_BLUEPRINT.route('/notebooks')
 @jwt_required
 def get_all_notebooks():
-    session = Session()
+    session = SESSION()
 
     return jsonify({
         "notebooks": list(map(lambda notebook: {
@@ -28,10 +28,10 @@ def get_all_notebooks():
         }, session.query(Notebook).all()))
     })
 
-@notebooks_blueprint.route('/notebooks/<notebook_id>')
+@NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>')
 @jwt_required
 def get_notebook(notebook_id):
-    session = Session()
+    session = SESSION()
 
     notebook = session.query(Notebook).get(int(notebook_id))
 
@@ -40,20 +40,20 @@ def get_notebook(notebook_id):
 
     return redirect(f'/api/coderepositories/{notebook.code_repo_id}/file?path={notebook.path}&sha={notebook.sha}')
 
-@notebooks_blueprint.route('/notebooks/<notebook_id>', methods=['DELETE'])
+@NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>', methods=['DELETE'])
 @jwt_required
 def delete_notebook(notebook_id):
-    session = Session()
+    session = SESSION()
 
     session.query(Notebook).filter(Notebook.id == int(notebook_id)).delete()
     session.commit()
 
     return jsonify({})
 
-@notebooks_blueprint.route('/notebooks', methods=['POST'])
+@NOTEBOOKS_BLUEPRINT.route('/notebooks', methods=['POST'])
 @jwt_required
-def importNotebooks():
-    session = Session()
+def import_notebooks():
+    session = SESSION()
     body = request.json if request.data  else None
 
     github = Github(get_jwt_identity())

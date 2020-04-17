@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from .code_repository import CodeRepository
+from src.backend.model.code_repository import CodeRepository
 
 NotebookBase = declarative_base()
 

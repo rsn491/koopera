@@ -1,25 +1,13 @@
-import nbformat
-from flask import Flask, jsonify, send_from_directory
-from nbconvert import HTMLExporter
-from .config import JWT_SECRET_KEY, ALLOW_CORS
-from datetime import datetime
+from flask import Flask, jsonify, request, send_from_directory
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                get_jwt_identity, jwt_optional, jwt_required)
+from github import Github, NamedUser
 
-from pygments import highlight
-import base64
-from pygments.formatters.html import HtmlFormatter
-from typing import Iterable
-from pygments.lexers import guess_lexer_for_filename
-from flask import request
-from github import Github, Repository, NamedUser
-from flask_jwt_extended import (
-    JWTManager, jwt_required,
-    create_access_token,
-    get_jwt_identity,
-    jwt_optional
-)
+from src.backend.api.code_repositories import CODE_REPOSITORIES_BLUEPRINT
+from src.backend.api.notebooks import NOTEBOOKS_BLUEPRINT
 
-from src.backend.api.code_repositories import code_repositories_blueprint
-from src.backend.api.notebooks import notebooks_blueprint
+from .config import ALLOW_CORS, JWT_SECRET_KEY
+
 
 class APIService:
 
@@ -35,8 +23,8 @@ class APIService:
         app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
         JWTManager(app)
 
-        app.register_blueprint(code_repositories_blueprint, url_prefix='/api')
-        app.register_blueprint(notebooks_blueprint, url_prefix='/api')
+        app.register_blueprint(CODE_REPOSITORIES_BLUEPRINT, url_prefix='/api')
+        app.register_blueprint(NOTEBOOKS_BLUEPRINT, url_prefix='/api')
 
         @app.route('/img/<path>')
         def get_img_file(path):
