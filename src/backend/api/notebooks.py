@@ -8,10 +8,13 @@ from src.backend.config import DATABASE_URI
 from src.backend.model.code_repository import CodeRepository
 from src.backend.model.notebook import Notebook
 
+# pylint: disable=no-member
+# Remove this when pylint no longer shows a false-positive "no-member" for SQLAlchemy "Session"
+# Issue: https://github.com/PyCQA/pylint/issues/3610
+
 SESSION = sessionmaker(create_engine(DATABASE_URI))
 
 NOTEBOOKS_BLUEPRINT = Blueprint('notebooks', __name__)
-
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks')
 @jwt_required
