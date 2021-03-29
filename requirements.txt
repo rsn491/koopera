@@ -1,7 +1,7 @@
 flask==1.1.1
 nbconvert==5.6.0
 nbformat==4.4.0
-pygments==2.4.2
+pygments==2.7.4
 PyGithub==1.47
 Flask-Cors==3.0.7
 Flask-JWT==0.3.2
