@@ -64,16 +64,18 @@ export default {
 }
 
 .access-token-input {
-  border: 1px solid var(--dark);
+  border: 1px solid var(--light);
   font-size: medium;
   border-radius: 4px;
   text-align: center;
 }
 
 .login-btn {
+  background-color: var(--dark);
+  color: var(--lighter);
   font-size: medium;
   border-radius: 4px;
-  border: 1px solid var(--dark);
+  border: 1px solid var(--lighter);
 }
 
 .source-control-provider .github-image {

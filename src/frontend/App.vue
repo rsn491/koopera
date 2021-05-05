@@ -1,9 +1,11 @@
 <template>
   <div id="app">
     <NavBar/>
-    <div class='container'>
-      <SubNav/>
-      <router-view/>
+    <div class='container-fluid'>
+       <div class="col-md-offset-1 col-md-10">
+        <SubNav/>
+        <router-view/>
+      </div>
     </div>
   </div>
 </template>
@@ -50,7 +52,6 @@ body {
 
 .box-container {
   background-color: white;
-  border: 1px solid var(--dark);
   border-radius: 2px;
   padding: 24px 32px;
 }
