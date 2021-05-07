@@ -16,7 +16,7 @@ Koopera
 **Koopera** is a collaboration app that enables Data Science teams to share and review their jupyter notebooks.
 
 # Features
-* Review jupyter notebooks by commenting directly on its cells
+* Review jupyter notebooks by looking at the diffs and commenting directly on the cells
 * Review source code with syntax highlight for python, scala, etc.
 * Import notebooks from your GitHub repositories
 * Navigate through your notebooks
@@ -26,7 +26,7 @@ Koopera
 
 **Review jupyter notebooks**
 
-<kbd><img title="Review jupyter notebooks" src="docs/add_comments_to_notebook.png"></kbd><br/>
+<kbd><img title="Review jupyter notebooks" src="docs/pr_notebook_diff.png"></kbd><br/>
 
 **Review python code**
 

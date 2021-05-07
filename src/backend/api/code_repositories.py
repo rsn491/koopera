@@ -88,6 +88,7 @@ def get_pull_request(code_repository_id, pull_request_id):
                     "path": file.filename,
                     "ref": pull_request.base.ref if file.status == 'removed'
                            else pull_request.head.ref,
+                    "prevRef": pull_request.base.ref,
                     "rawUrl": file.raw_url,
                     "status": file.status,
                     "sha": file.sha
@@ -145,19 +146,8 @@ def add_comment(code_repository_id, pull_request_id):
 
     return jsonify({'id': created_comment.id})
 
-
-@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/file'
-                                  )
-@jwt_required()
-def get_file(code_repository_id):
-    file_path = request.args.get("path")
-    file_sha = request.args.get("sha")
-
-    github = Github(get_jwt_identity())
-    code_repo: Repository = github.get_repo(int(code_repository_id))
-
-    file_blob = code_repo.get_git_blob(file_sha)
-    file_content = base64.b64decode(file_blob.content)
+def convert_github_file_to_html(file_path, content):
+    file_content = base64.b64decode(content)
 
     if file_path.endswith('.ipynb'):
         html_exporter = HTMLExporter()
@@ -174,4 +164,22 @@ def get_file(code_repository_id):
                                   classprefix='koopera-code-viewer')
         body = highlight(file_content, lexer, formatter)
 
-    return jsonify({'body': body})
+    return body
+
+@CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/file'
+                                  )
+@jwt_required()
+def get_file(code_repository_id):
+    file_sha = request.args.get("sha")
+    file_path = request.args.get("path")
+    file_ref = request.args.get("ref")
+
+    github = Github(get_jwt_identity())
+    code_repo: Repository = github.get_repo(int(code_repository_id))
+
+    if file_sha:
+        content = code_repo.get_git_blob(file_sha).content
+    else:
+        content = code_repo.get_contents(file_path, file_ref).content
+
+    return jsonify({'body': convert_github_file_to_html(file_path, content)})
