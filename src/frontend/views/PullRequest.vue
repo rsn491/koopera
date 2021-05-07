@@ -218,7 +218,7 @@ export default {
       containerElement.setAttribute('class', 'd-flex');
 
       if (!this.isIpynbFile) {
-        const linenoElements = document.getElementsByClassName('lineno');
+        const linenoElements = document.getElementsByClassName('linenos');
 
         if (codeBlockId + 1 >= linenoElements.length) {
           // comment in last line
@@ -272,7 +272,7 @@ export default {
     if (this.isIpynbFile) {
       this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
     } else {
-      this.attachCodeCommentHandlers(document.getElementsByClassName('lineno'));
+      this.attachCodeCommentHandlers(document.getElementsByClassName('linenos'));
     }
   },
   created() {
@@ -331,12 +331,12 @@ export default {
   cursor: pointer;
 }
 
-.file-view-container .lineno:hover {
+.file-view-container .linenos:hover {
   opacity: 0.6;
   background-color: var(--darker);
 }
 
-.file-view-container span.lineno {
+.file-view-container span.linenos {
   background-color: var(--dark);
   cursor: pointer;
   color: var(--lighter);
