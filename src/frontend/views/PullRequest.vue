@@ -66,7 +66,7 @@
               <a v-bind:class="file.status === 'removed' ?
                 'btn alert alert-danger p-0 mb-1' :
                 'btn alert-success p-0 mb-1'"
-                v-on:click='() => getFile(file.path, file.ref, file.sha)'>
+                v-on:click='() => getFile(file.path, file.ref, file.prevRef, file.status)'>
                 {{ file.path }}
               </a>
           </div>
@@ -81,6 +81,8 @@
 </template>
 
 <script>
+
+import HtmlDiff from 'htmldiff-js';
 
 import getAPIUrl from '../shared/getAPIUrl';
 import CredentialManager from '../shared/credentialManager';
@@ -167,23 +169,28 @@ export default {
         });
       });
     },
-    getFile(path, ref, sha) {
-      this.loadingFile = true;
-
-      fetch(getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/file?path=${path}&ref=${ref}&sha=${sha}`), {
+    async getFileContent(path, ref) {
+      return new Promise(resolve => fetch(getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/file?path=${path}&ref=${ref}`), {
         headers: {
           Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
         },
-      }).then((response) => {
-        response.json().then((json) => {
-          this.fileDisplay = json.body;
-          this.loadingFile = false;
-          this.filePath = path;
-          this.renderFileComments = true;
-          this.fileComments = {};
-          this.isIpynbFile = this.filePath.endsWith('.ipynb');
-        });
-      });
+      }).then(response => response.json().then(json => resolve(json.body))));
+    },
+    async getFile(path, ref, prevRef, status) {
+      this.loadingFile = true;
+      const fileContent = status === 'removed'
+        ? ''
+        : await this.getFileContent(path, ref);
+      const prevFileContent = status === 'added'
+        ? ''
+        : await this.getFileContent(path, prevRef);
+
+      this.fileDisplay = HtmlDiff.execute(prevFileContent, fileContent);
+      this.filePath = path;
+      this.fileComments = {};
+      this.loadingFile = false;
+      this.renderFileComments = true;
+      this.isIpynbFile = this.filePath.endsWith('.ipynb');
     },
     openComment(elementToAttach, codeBlockId) {
       // check if there is any comment currently opened
@@ -329,6 +336,36 @@ export default {
 
 .inner_cell {
   cursor: pointer;
+}
+
+.file-view-container ins {
+    text-decoration: none;
+    background-color: #d4fcbc;
+}
+
+.file-view-container ins img {
+    border: 2px solid var(--success);
+    padding: 4px;
+}
+
+.file-view-container .output_png ins {
+    background-color: unset;
+}
+
+.file-view-container del {
+    text-decoration: line-through;
+    background-color: #fbb6c2;
+    color: #555;
+}
+
+.file-view-container del img {
+    border: 2px solid #fbb6c2;
+    padding: 8px;
+    margin-right: 8px;
+}
+
+.file-view-container .output_png del {
+    background-color: unset;
 }
 
 .file-view-container .linenos:hover {
