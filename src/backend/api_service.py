@@ -52,7 +52,7 @@ class APIService:
             return jsonify(accessToken=access_token), 200
 
         @app.route('/api/me')
-        @jwt_required
+        @jwt_required()
         def user_info():
             github = Github(get_jwt_identity())
             user: NamedUser = github.get_user()
