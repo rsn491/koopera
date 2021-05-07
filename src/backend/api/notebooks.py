@@ -17,7 +17,7 @@ SESSION = sessionmaker(create_engine(DATABASE_URI))
 NOTEBOOKS_BLUEPRINT = Blueprint('notebooks', __name__)
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks')
-@jwt_required
+@jwt_required()
 def get_all_notebooks():
     session = SESSION()
 
@@ -37,7 +37,7 @@ def get_all_notebooks():
 
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>')
-@jwt_required
+@jwt_required()
 def get_notebook(notebook_id):
     session = SESSION()
 
@@ -52,7 +52,7 @@ def get_notebook(notebook_id):
 
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks/<notebook_id>', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 def delete_notebook(notebook_id):
     session = SESSION()
 
@@ -63,7 +63,7 @@ def delete_notebook(notebook_id):
 
 
 @NOTEBOOKS_BLUEPRINT.route('/notebooks', methods=['POST'])
-@jwt_required
+@jwt_required()
 def import_notebooks():
     session = SESSION()
     body = request.json if request.data else None

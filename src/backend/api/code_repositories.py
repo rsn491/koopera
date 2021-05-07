@@ -19,7 +19,7 @@ CODE_REPOSITORIES_BLUEPRINT = Blueprint('code_repositories', __name__)
 
 
 @CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories')
-@jwt_required
+@jwt_required()
 def get_code_repositories():
     github = Github(get_jwt_identity())
     code_repos: Iterable[Repository] = github.get_user().get_repos()
@@ -38,7 +38,7 @@ def get_code_repositories():
 
 @CODE_REPOSITORIES_BLUEPRINT.route(
     '/coderepositories/<code_repository_id>/pullrequests')
-@jwt_required
+@jwt_required()
 def get_pull_requests(code_repository_id: int):
     github = Github(get_jwt_identity())
     code_repository = github.get_repo(full_name_or_id=int(code_repository_id))
@@ -59,7 +59,7 @@ def get_pull_requests(code_repository_id: int):
 
 @CODE_REPOSITORIES_BLUEPRINT.route(
     '/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>')
-@jwt_required
+@jwt_required()
 def get_pull_request(code_repository_id, pull_request_id):
     github = Github(get_jwt_identity())
     code_repository: Repository = github.get_repo(
@@ -98,7 +98,7 @@ def get_pull_request(code_repository_id, pull_request_id):
 @CODE_REPOSITORIES_BLUEPRINT.route(
     '/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/merge',
     methods=['POST'])
-@jwt_required
+@jwt_required()
 def merge_pull_request(code_repository_id, pull_request_id):
     github = Github(get_jwt_identity())
     code_repository: Repository = github.get_repo(
@@ -118,7 +118,7 @@ def merge_pull_request(code_repository_id, pull_request_id):
 @CODE_REPOSITORIES_BLUEPRINT.route(
     '/coderepositories/<code_repository_id>/pullrequests/<pull_request_id>/comment',
     methods=['POST'])
-@jwt_required
+@jwt_required()
 def add_comment(code_repository_id, pull_request_id):
     body = request.json
 
@@ -148,7 +148,7 @@ def add_comment(code_repository_id, pull_request_id):
 
 @CODE_REPOSITORIES_BLUEPRINT.route('/coderepositories/<code_repository_id>/file'
                                   )
-@jwt_required
+@jwt_required()
 def get_file(code_repository_id):
     file_path = request.args.get("path")
     file_sha = request.args.get("sha")

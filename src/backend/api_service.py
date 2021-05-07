@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token,
-                                get_jwt_identity, jwt_optional, jwt_required)
+                                get_jwt_identity, jwt_required)
 from github import Github, NamedUser, BadCredentialsException
 
 from src.backend.api.code_repositories import CODE_REPOSITORIES_BLUEPRINT
@@ -38,7 +38,7 @@ class APIService:
             return send_from_directory('static/css', path)
 
         @app.route('/api/login', methods=['POST'])
-        @jwt_optional
+        @jwt_required(optional=True)
         def login():
             personal_access_token = request.json['personalAccessToken']
             github = Github(personal_access_token)
