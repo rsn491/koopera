@@ -51,7 +51,8 @@ def get_pull_requests(code_repository_id: int):
                     "id": pull_request.id,
                     "number": pull_request.number,
                     "title": pull_request.title,
-                    "userName": pull_request.user.name
+                    "userName": pull_request.user.name,
+                    "userAvatarUrl": pull_request.user.avatar_url
                 },
                 code_repository.get_pulls().get_page(0)))
     })

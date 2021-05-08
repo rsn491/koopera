@@ -1,28 +1,22 @@
 <template>
   <div class='box-container'>
     <Loader v-bind:show='!loaded' />
-    <div class='col-12'
+    <div class='list-row'
       v-for='codeRepository in codeRepositories'
       v-bind:key='codeRepository.id'>
-      <div class='row text-left'>
-        <div class='col-2'>
-        {{ codeRepository.id }}
+        <div class='d-flex flex-grow-1'>
+          <div class='github-image row-image'/>
+          <h5>{{ codeRepository.name }}</h5>
         </div>
-        <div class='col-7'>
-        {{ codeRepository.name }}
+        <div>
+          <router-link
+            v-bind:class='codeRepository.openPullRequestCount > 0 ?
+              "btn btn-link p-0" :
+              "btn btn-link p-0 disabled"'
+            v-bind:to='`/coderepositories/${codeRepository.id}/pullrequests`' >
+            Pull Requests ({{ codeRepository.openPullRequestCount }} open)
+          </router-link>
         </div>
-        <div class='col-3'>
-        <router-link
-          v-bind:class='codeRepository.openPullRequestCount > 0 ?
-            "btn btn-link p-0" :
-            "btn btn-link p-0 disabled"'
-          v-bind:to='`/coderepositories/${codeRepository.id}/pullrequests`' >
-          Pull Requests ({{ codeRepository.openPullRequestCount }} open)
-        </router-link>
-        </div>
-      </div>
-      <div class='row border-lighter'/>
-      <br/>
     </div>
   </div>
 </template>
@@ -70,3 +64,31 @@ export default {
   },
 };
 </script>
+
+<style>
+
+.list-row {
+  align-items: center;
+  border: 1px solid var(--lighter);
+  border-radius: 2px;
+  display: flex;
+  margin-bottom: 8px;
+  padding: 12px 24px;
+}
+
+.list-row >div {
+  align-items: center;
+  display: flex;
+}
+
+.list-row .row-image {
+  height: 36px;
+  margin-right: 12px;
+  width: 36px;
+}
+
+.list-row h5 {
+  margin-bottom: 0;
+}
+
+</style>

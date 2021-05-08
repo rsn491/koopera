@@ -398,16 +398,18 @@ export default {
 }
 
 .file-list .file-change {
-  display: flex;
   align-items: center;
+  color: var(--dark);
+  display: flex;
 }
 
-.file-list .file-change:hover {
+.file-list .file-change a:hover {
   color: var(--darker);
   font-weight: bold;
 }
 
-.file-change .file-selected {
+.file-list .file-change .file-selected {
+  color: var(--darker);
   font-weight: bold;
 }
 

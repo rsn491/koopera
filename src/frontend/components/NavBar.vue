@@ -18,9 +18,9 @@
         v-bind:style="{ 'background-image': 'url(' + avatarUrl + ')' }">
       </div>
       <div class='user-logout-container'>
-        <a class='btn navbar-btn'
+        <a class='material-icons btn navbar-btn'
           v-on:click='logout'>
-          Logout
+          logout
         </a>
       </div>
     </div>

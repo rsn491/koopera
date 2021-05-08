@@ -1,20 +1,15 @@
 <template>
   <div class="box-container">
     <Loader v-bind:show='!loaded' />
-    <div class="col-12"
+    <div class="list-row"
       v-for="pullRequest in pullRequests"
       v-bind:key="pullRequest.id">
-      <div class="row text-left">
-        <div class="col-2">
-        {{ pullRequest.id }}
-        </div>
-        <div class="col-2">
-        {{ pullRequest.userName }}
-        </div>
-        <div class="col-6">
-        {{ pullRequest.title }}
-        </div>
-        <div class="col-2">
+      <div class="d-flex flex-grow-1">
+        <div class='author-avatar row-image'
+        :style="`background-image: url(${pullRequest.userAvatarUrl})`"/>
+        <h5>{{ pullRequest.title }}</h5>
+      </div>
+      <div>
         <router-link
           class="btn btn-link p-0"
           v-bind:to="'/coderepositories/' +
@@ -23,10 +18,7 @@
             pullRequest.number">
           Review
         </router-link>
-        </div>
       </div>
-      <div class="row border-lighter"/>
-      <br/>
     </div>
   </div>
 </template>
@@ -75,3 +67,14 @@ export default {
 };
 
 </script>
+
+<style>
+
+.list-row .author-avatar {
+  background-size: contain;
+  background-position-x: center;
+  background-repeat: no-repeat;
+  border-radius: 2px;
+}
+
+</style>
