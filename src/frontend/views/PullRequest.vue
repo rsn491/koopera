@@ -62,10 +62,13 @@
       <div class='col-12' v-if="showDescription" v-html="body"/>
       <div class='col-3 file-explorer-container text-left' v-if="!showDescription">
         <div class='file-list'>
-          <div v-for='file in files' v-bind:key='file.path'>
-              <a v-bind:class="file.status === 'removed' ?
-                'btn alert alert-danger p-0 mb-1' :
-                'btn alert-success p-0 mb-1'"
+          <div class='file-change' v-for='file in files' v-bind:key='file.path'>
+            <span v-if="file.status === 'removed'" class="material-icons removed-file">remove</span>
+            <span v-else-if="file.status === 'added'" class="material-icons added-file">add</span>
+            <span v-else class="material-icons modified-file">waves</span>
+              <a v-bind:class="filePath === file.path ?
+                'btn alert p-0 mb-1 file-selected' :
+                'btn alert p-0 mb-1'"
                 v-on:click='() => getFile(file.path, file.ref, file.prevRef, file.status)'>
                 {{ file.path }}
               </a>
@@ -177,6 +180,7 @@ export default {
       }).then(response => response.json().then(json => resolve(json.body))));
     },
     async getFile(path, ref, prevRef, status) {
+      this.filePath = path;
       this.loadingFile = true;
       const fileContent = status === 'removed'
         ? ''
@@ -186,7 +190,6 @@ export default {
         : await this.getFileContent(path, prevRef);
 
       this.fileDisplay = HtmlDiff.execute(prevFileContent, fileContent);
-      this.filePath = path;
       this.fileComments = {};
       this.loadingFile = false;
       this.renderFileComments = true;
@@ -392,6 +395,45 @@ export default {
 
 .file-list {
   overflow: auto;
+}
+
+.file-list .file-change {
+  display: flex;
+  align-items: center;
+}
+
+.file-list .file-change:hover {
+  color: var(--darker);
+  font-weight: bold;
+}
+
+.file-change .file-selected {
+  font-weight: bold;
+}
+
+.file-list .file-change a {
+  margin-bottom: 0!important;
+}
+
+.file-list .file-change .material-icons {
+  font-size: 20px;
+  margin-right: 4px;
+}
+
+.file-list .file-change span {
+  margin: 4px 0;
+}
+
+.file-list .file-change .removed-file {
+  color: red
+}
+
+.file-list .file-change .added-file {
+  color: var(--success);
+}
+
+.file-list .file-change .modified-file {
+  color: var(--dark);
 }
 
 .code-comment-container {
