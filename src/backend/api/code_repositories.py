@@ -92,7 +92,8 @@ def get_pull_request(code_repository_id, pull_request_id):
                     "prevRef": pull_request.base.ref,
                     "rawUrl": file.raw_url,
                     "status": file.status,
-                    "sha": file.sha
+                    "sha": file.sha,
+                    "patch": file.patch
                 }, pull_request.get_files()))
     })
 

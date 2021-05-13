@@ -66,10 +66,10 @@ export default class CodeComment {
         <div class='container code-comment-container'>
           ${this.comments.length > 0 ? CodeComment._getCommentsAsHtmlStr(this.comments) : ''}
           <div style="display: contents;">
-            <div class="d-table-row">
+            <div>
               <textarea class="code-comment-text" value=""></textarea>
             </div>
-            <div class="d-table-row">
+            <div>
               <button class='save-code-comment-btn btn btn-light'>Save</button>
             </div>
           </div>

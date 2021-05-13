@@ -69,7 +69,8 @@
               <a v-bind:class="filePath === file.path ?
                 'btn alert p-0 mb-1 file-selected' :
                 'btn alert p-0 mb-1'"
-                v-on:click='() => getFile(file.path, file.ref, file.prevRef, file.status)'>
+                v-on:click='() =>
+                getFile(file.path, file.ref, file.prevRef, file.status, file.patch)'>
                 {{ file.path }}
               </a>
           </div>
@@ -77,7 +78,9 @@
       </div>
       <div class='col-9 file-view-container' v-if="!showDescription">
         <Loader v-bind:show="loadingFile" />
-        <div :class="loadingFile ? 'd-none' : isIpynbFile && 'koopera-nb'" v-html="fileDisplay"/>
+        <div id="code-change-wrapper"
+          :class="loadingFile ? 'd-none' : isIpynbFile && 'koopera-nb'"
+          v-html="fileDisplay"/>
       </div>
     </div>
   </div>
@@ -86,6 +89,7 @@
 <script>
 
 import HtmlDiff from 'htmldiff-js';
+import { Diff2HtmlUI } from 'diff2html/lib/ui/js/diff2html-ui-slim';
 
 import getAPIUrl from '../shared/getAPIUrl';
 import CredentialManager from '../shared/credentialManager';
@@ -179,21 +183,47 @@ export default {
         },
       }).then(response => response.json().then(json => resolve(json.body))));
     },
-    async getFile(path, ref, prevRef, status) {
+    async getFile(path, ref, prevRef, status, patch) {
       this.filePath = path;
       this.loadingFile = true;
-      const fileContent = status === 'removed'
-        ? ''
-        : await this.getFileContent(path, ref);
-      const prevFileContent = status === 'added'
-        ? ''
-        : await this.getFileContent(path, prevRef);
 
-      this.fileDisplay = HtmlDiff.execute(prevFileContent, fileContent);
+      this.isIpynbFile = this.filePath.endsWith('.ipynb');
+      if (this.isIpynbFile) {
+        const fileContent = status === 'removed'
+          ? ''
+          : await this.getFileContent(path, ref);
+        const prevFileContent = status === 'added'
+          ? ''
+          : await this.getFileContent(path, prevRef);
+        this.fileDisplay = HtmlDiff.execute(prevFileContent, fileContent);
+      } else {
+        const diff = `--- ${path}\n+++ ${path}\n${patch}`;
+        // eslint-disable-next-line no-undef
+        const diff2htmlUi = new Diff2HtmlUI(document.getElementById('code-change-wrapper'), diff, {
+          drawFileList: false,
+          matching: 'lines',
+          rawTemplates: {
+            'line-by-line-file-diff': `
+            <div id="{{fileHtmlId}}" class="d2h-file-wrapper" data-lang="{{file.language}}">
+                <div class="d2h-file-diff">
+                    <div class="d2h-code-wrapper">
+                        <table class="d2h-diff-table">
+                            <tbody class="d2h-diff-tbody">
+                            {{{diffs}}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`
+          }
+        });
+        diff2htmlUi.draw();
+        diff2htmlUi.highlightCode();
+      }
+
       this.fileComments = {};
       this.loadingFile = false;
       this.renderFileComments = true;
-      this.isIpynbFile = this.filePath.endsWith('.ipynb');
     },
     openComment(elementToAttach, codeBlockId) {
       // check if there is any comment currently opened
@@ -224,24 +254,28 @@ export default {
       this.$forceUpdate();
     },
     createContainerElement(elementToAttach, codeBlockId) {
-      const containerElement = document.createElement('div');
-      containerElement.setAttribute('class', 'd-flex');
-
-      if (!this.isIpynbFile) {
-        const linenoElements = document.getElementsByClassName('linenos');
-
-        if (codeBlockId + 1 >= linenoElements.length) {
-          // comment in last line
-          elementToAttach.parentElement.appendChild(containerElement);
-        } else {
-          const targetElement = linenoElements[codeBlockId + 1];
-          targetElement.parentElement.insertBefore(containerElement, targetElement);
-        }
-      } else {
+      if (this.isIpynbFile) {
+        const containerElement = document.createElement('div');
+        containerElement.setAttribute('class', 'd-flex');
         elementToAttach.appendChild(containerElement);
+        return containerElement;
       }
 
-      return containerElement;
+      const containerElement = document.createElement('tr');
+      const linenoElements = Array.from(document.getElementsByClassName('d2h-code-linenumber')).map(element => element.parentElement);
+
+      if (codeBlockId + 1 >= linenoElements.length) {
+        // comment in last line
+        elementToAttach.parentElement.appendChild(containerElement);
+      } else {
+        const targetElement = linenoElements[codeBlockId + 1];
+        targetElement.parentElement.insertBefore(containerElement, targetElement);
+      }
+
+      containerElement.appendChild(document.createElement('td'));
+      containerElement.appendChild(document.createElement('td'));
+
+      return containerElement.lastChild;
     },
     attachCodeCommentHandlers(matches) {
       const codeCommentsForCurrentFile = this.pullRequestComments[this.filePath];
@@ -275,14 +309,14 @@ export default {
     },
   },
   updated() {
-    if (this.loadingFile) {
+    if (this.loadingFile || !this.filePath) {
       return;
     }
 
     if (this.isIpynbFile) {
       this.attachCodeCommentHandlers(document.getElementsByClassName('inner_cell'));
     } else {
-      this.attachCodeCommentHandlers(document.getElementsByClassName('linenos'));
+      this.attachCodeCommentHandlers(Array.from(document.getElementsByClassName('d2h-code-linenumber')).map(element => element.parentElement));
     }
   },
   created() {
@@ -356,7 +390,7 @@ export default {
 }
 
 .file-view-container del {
-    text-decoration: line-through;
+    text-decoration: none;
     background-color: #fbb6c2;
     color: #555;
 }
@@ -442,10 +476,12 @@ export default {
   background-color: #f8f9fa;
   border: 1px solid var(--dark);
   border-radius: 2px;
-  display: table;
-  padding: 8px;
+  font-size: 1rem;
+  font-weight: 400;
   margin-bottom: 8px;
+  margin-left: 0;
   margin-top: 8px;
+  padding: 8px;
 }
 
 .code-comment-text {

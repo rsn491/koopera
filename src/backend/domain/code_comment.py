@@ -31,7 +31,7 @@ class CodeComment:
         if self.is_ipynb_file(self.filePath):
             return 1
 
-        return self.codeBlockId + 1
+        return self.codeBlockId
 
     def get_github_comment(self) -> str:
         if self.is_ipynb_file(self.filePath):
@@ -53,7 +53,7 @@ class CodeComment:
             code_block_id = int(code_block_id)
             body = body[separator_index + 2:body.__len__()]
         else:
-            code_block_id = code_comment.position - 1 if code_comment.position is not None else 1
+            code_block_id = code_comment.position if code_comment.position is not None else 1
 
         return CodeComment(id=code_comment.id,
                            file_path=code_comment.path,

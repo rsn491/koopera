@@ -17,7 +17,7 @@ Koopera
 
 # Features
 * Review jupyter notebooks by looking at the diffs and commenting directly on the cells
-* Review source code with syntax highlight for python, scala, etc.
+* Review source code with syntax highlight for python, scala, etc. (using [diff2html](https://github.com/rtfpessoa/diff2html))
 * Import notebooks from your GitHub repositories
 * Navigate through your notebooks
 * GitHub authentication via personal access token
@@ -30,7 +30,7 @@ Koopera
 
 **Review python code**
 
-<kbd><img title="Review python code" src="docs/add_comments_to_python_file.png"></kbd><br/>
+<kbd><img title="Review python code" src="docs/python_file_diff.png"></kbd><br/>
 
 **Import and navigate through your notebooks**
 
