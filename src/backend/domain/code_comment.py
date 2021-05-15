@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from github.PullRequestComment import PullRequestComment
@@ -60,4 +60,4 @@ class CodeComment:
                            code_block_id=code_block_id,
                            body=body,
                            author=code_comment.user.name,
-                           updated_at=code_comment.updated_at.timestamp())
+                           updated_at=code_comment.updated_at.replace(tzinfo=timezone.utc).timestamp())
