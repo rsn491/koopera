@@ -22,7 +22,7 @@
             'pr-header__links__link'"
             v-on:click="() => this.showDescription = true">
             <span class="material-icons" >subject</span>
-            Description
+            Overview
           </div>
           <div :class="showDescription ?
             'pr-header__links__link' :
@@ -32,40 +32,50 @@
             Files ({{ files.length }})
           </div>
         </div>
-        <div class='pr-header__btns'>
-          <div :class="showMergeStrategies ?
-            'pr-header__btns__btn pr-header__btns__btn--active' :
-            'pr-header__btns__btn'"
-            v-on:click="() => showMergeStrategies = !showMergeStrategies">
-            <span class="material-icons" >done</span>
-            Merge
+      </div>
+    </div>
+    <Loader v-bind:show="loadingPr" />
+    <div :class="loadingPr ? 'd-none' : 'row'">
+      <div class='col-12' v-if="showDescription">
+        <div class='description-container'>
+          <h6>
+            Description
+          </h6>
+          <div v-html="body"/>
+        </div>
+
+        <div class='merge-container'>
+          <div class='merge-btn btn btn-success'>
+            <button class='btn btn-success' v-on:click='merge'>
+              {{ this.mergeStrategy }}
+            </button>
+            <button class="btn btn-success material-icons"
+              v-on:click="() => showMergeStrategies = !showMergeStrategies">
+              merge_type
+            </button>
           </div>
           <div class='pr-merge-strategies' v-if=showMergeStrategies>
             <div class='pr-merge-strategies__strategy'
-              v-on:click="() => merge('merge')">
+              v-on:click="() => selectMergeStrategy('merge')">
               Merge
             </div>
             <div class='pr-merge-strategies__strategy'
-              v-on:click="() => merge('squash')">
+              v-on:click="() => selectMergeStrategy('squash')">
               Squash
             </div>
             <div class='pr-merge-strategies__strategy'
-              v-on:click="() => merge('rebase')">
+              v-on:click="() => selectMergeStrategy('rebase')">
               Rebase
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <Loader v-bind:show="loadingPr" />
-    <div :class="loadingPr ? 'd-none' : 'row'">
-      <div class='col-12' v-if="showDescription" v-html="body"/>
       <div class='col-3 file-explorer-container text-left' v-if="!showDescription">
         <div class='file-list'>
           <div class='file-change' v-for='file in files' v-bind:key='file.path'>
             <span v-if="file.status === 'removed'" class="material-icons removed-file">remove</span>
             <span v-else-if="file.status === 'added'" class="material-icons added-file">add</span>
-            <span v-else class="material-icons modified-file">waves</span>
+            <span v-else class="material-icons modified-file">emergency</span>
               <a v-bind:class="filePath === file.path ?
                 'btn alert p-0 mb-1 file-selected' :
                 'btn alert p-0 mb-1'"
@@ -110,6 +120,7 @@ export default {
       renderFileComments: false,
       showMergeStrategies: false,
       showDescription: true,
+      mergeStrategy: 'merge',
       files: [],
       filePath: '',
       fileDisplay: '',
@@ -124,7 +135,11 @@ export default {
     };
   },
   methods: {
-    merge(mergeStrategy) {
+    selectMergeStrategy(mergeStrategy) {
+      this.mergeStrategy = mergeStrategy;
+      this.showMergeStrategies = false;
+    },
+    merge() {
       fetch(
         getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/pullrequests/${this.$route.params.pullRequestNumber}/merge`),
         {
@@ -134,11 +149,10 @@ export default {
             Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
           },
           body: JSON.stringify({
-            mergeStrategy
+            mergeStrategy: this.mergeStrategy
           }),
         },
       ).then((response) => {
-        this.showMergeStrategies = false;
         this.state = 'Closed';
 
         if (response.status !== 200) {
@@ -566,30 +580,6 @@ export default {
   padding-bottom: 2px;
 }
 
-.pr-header__btns {
-  display: flex;
-  position: relative;
-}
-
-.pr-header__btns__btn {
-  align-items: center;
-  background-color: var(--lighter);
-  border: 1px solid var(--light);
-  border-radius: 4px;
-  color: var(--dark);
-  cursor: pointer;
-  display: flex;
-  padding: 4px 2px;
-}
-
-.pr-header__btns__btn--active {
-  color: var(--light);
-}
-
-.pr-header__btns__btn .material-icons {
-  color:  var(--success);
-}
-
 .pr-header__actions .material-icons {
   margin-right: 2px;
 }
@@ -617,7 +607,7 @@ export default {
   overflow: hidden;
   position: absolute;
   text-align: center;
-  top: 35px;
+  top: 60px;
   width: 80px;
   z-index: 1;
 }
@@ -631,6 +621,7 @@ export default {
 
 .pr-merge-strategies__strategy:hover {
   color: var(--darker);
+  font-weight: bold;
 }
 
 .pr-status {
@@ -656,6 +647,36 @@ export default {
 
 .pr-status--open .dot {
   background-color: var(--success);
+}
+
+.description-container h6 {
+  border-bottom: 1px solid var(--lighter);
+  color: var(--darker);
+  font-weight: bold;
+}
+
+.description-container div {
+  padding: 24px;
+}
+
+.merge-container {
+  border-top: 1px solid var(--lighter);
+  margin-top: 24px;
+  padding-top: 16px;
+  position: relative;
+}
+
+.merge-btn {
+  padding: 0;
+}
+
+.merge-btn button:first-of-type {
+  text-transform: capitalize;
+}
+
+.merge-btn .material-icons {
+  border-left: 1px solid var(--light);
+  border-radius: 0;
 }
 
 </style>
