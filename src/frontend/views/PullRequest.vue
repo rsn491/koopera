@@ -70,7 +70,7 @@
                 'btn alert p-0 mb-1 file-selected' :
                 'btn alert p-0 mb-1'"
                 v-on:click='() =>
-                getFile(file.path, file.ref, file.prevRef, file.status, file.patch)'>
+                loadFile(file.path, file.ref, file.prevRef, file.status, file.patch)'>
                 {{ file.path }}
               </a>
           </div>
@@ -113,8 +113,8 @@ export default {
       files: [],
       filePath: '',
       fileDisplay: '',
-      pullRequestComments: {},
-      fileComments: {},
+      fileComments: [],
+      fileCommentElements: {},
       title: null,
       state: null,
       authorAvatarUrl: null,
@@ -170,7 +170,7 @@ export default {
         response.json().then((json) => {
           this.openedCodeComment.addComment(json.id, newComment);
           // register code block comment
-          this.fileComments[codeBlockId] = this.openedCodeComment;
+          this.fileCommentElements[codeBlockId] = this.openedCodeComment;
           this.openedCodeComment = null;
           this.$forceUpdate();
         });
@@ -183,7 +183,50 @@ export default {
         },
       }).then(response => response.json().then(json => resolve(json.body))));
     },
-    async getFile(path, ref, prevRef, status, patch) {
+    async getPullRequestData() {
+      return new Promise(resolve => fetch(getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/pullrequests/${this.$route.params.pullRequestNumber}`), {
+        headers: {
+          Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
+        },
+      }).then((response) => {
+        if (response.status === 401 || response.status === 422) {
+          this.$router.push({ name: 'login' });
+          return;
+        }
+        response.json().then(json => resolve(json));
+      }));
+    },
+    async loadPullRequestData() {
+      const pullRequestInfo = await this.getPullRequestData();
+
+      store.setCodeRepo(this.$route.params.codeRepositoryId, pullRequestInfo.codeRepoName);
+      this.authorAvatarUrl = pullRequestInfo.userAvatarUrl;
+      this.body = pullRequestInfo.body;
+      this.state = pullRequestInfo.state;
+      this.files = pullRequestInfo.files;
+      this.title = pullRequestInfo.title;
+      this.fileComments = {};
+
+      if (this.filePath) {
+        pullRequestInfo.comments
+          .filter(comment => comment.filePath === this.filePath)
+          .forEach((comment) => {
+            const { codeBlockId } = comment;
+
+            if (!(codeBlockId in this.fileComments)) {
+              this.fileComments[codeBlockId] = [];
+            }
+
+            this.fileComments[codeBlockId].push({
+              id: comment.id,
+              author: comment.author,
+              comment: comment.body,
+              updatedAt: comment.updatedAt,
+            });
+          });
+      }
+    },
+    async loadFile(path, ref, prevRef, status, patch) {
       this.filePath = path;
       this.loadingFile = true;
 
@@ -221,7 +264,8 @@ export default {
         diff2htmlUi.highlightCode();
       }
 
-      this.fileComments = {};
+      // refresh pull request data
+      await this.loadPullRequestData();
       this.loadingFile = false;
       this.renderFileComments = true;
     },
@@ -238,7 +282,7 @@ export default {
 
       // no comment is opened
       // check if there are already comments for this code block
-      if (!this.fileComments[codeBlockId]) {
+      if (!this.fileCommentElements[codeBlockId]) {
         // first comment for this code block
         this.openedCodeComment = CodeComment.createNew(
           this.createContainerElement(elementToAttach, codeBlockId),
@@ -247,8 +291,8 @@ export default {
           this.addComment
         );
       } else {
-        this.fileComments[codeBlockId].open();
-        this.openedCodeComment = this.fileComments[codeBlockId];
+        this.fileCommentElements[codeBlockId].open();
+        this.openedCodeComment = this.fileCommentElements[codeBlockId];
       }
 
       this.$forceUpdate();
@@ -278,8 +322,6 @@ export default {
       return containerElement.lastChild;
     },
     attachCodeCommentHandlers(matches) {
-      const codeCommentsForCurrentFile = this.pullRequestComments[this.filePath];
-
       if (!this.renderFileComments) {
         return;
       }
@@ -287,13 +329,13 @@ export default {
       for (let i = 0; i < matches.length; i += 1) {
         const elementToAttach = matches[i];
         const codeBlockId = i;
-        const codeBlockComments = codeCommentsForCurrentFile
-          && codeCommentsForCurrentFile[codeBlockId];
+        const codeBlockComments = this.fileComments
+          && this.fileComments[codeBlockId];
 
         if (this.renderFileComments && !!codeBlockComments) {
           // has code block comment -> register and render!
           const containerElement = this.createContainerElement(elementToAttach, codeBlockId);
-          this.fileComments[codeBlockId] = CodeComment.createExisting(
+          this.fileCommentElements[codeBlockId] = CodeComment.createExisting(
             containerElement, this.filePath, codeBlockId, this.addComment, codeBlockComments,
           );
 
@@ -319,50 +361,13 @@ export default {
       this.attachCodeCommentHandlers(Array.from(document.getElementsByClassName('d2h-code-linenumber')).map(element => element.parentElement));
     }
   },
-  created() {
+  async created() {
     if (!this.userCredentials.isValid()) {
       this.$router.push({ name: 'login' });
     }
 
-    fetch(getAPIUrl(`coderepositories/${this.$route.params.codeRepositoryId}/pullrequests/${this.$route.params.pullRequestNumber}`), {
-      headers: {
-        Authorization: `Bearer ${this.userCredentials.apiAccessToken}`,
-      },
-    }).then((response) => {
-      if (response.status === 401 || response.status === 422) {
-        this.$router.push({ name: 'login' });
-      }
-
-      response.json().then((json) => {
-        this.loadingPr = false;
-        store.setCodeRepo(this.$route.params.codeRepositoryId, json.codeRepoName);
-        this.authorAvatarUrl = json.userAvatarUrl;
-        this.body = json.body;
-        this.state = json.state;
-        this.files = json.files;
-        this.title = json.title;
-
-        this.pullRequestComments = {};
-        json.comments.forEach((comment) => {
-          const { filePath, codeBlockId } = comment;
-
-          if ((filePath in this.pullRequestComments) === false) {
-            this.pullRequestComments[filePath] = {};
-          }
-
-          if ((codeBlockId in this.pullRequestComments[filePath]) === false) {
-            this.pullRequestComments[filePath][codeBlockId] = [];
-          }
-
-          this.pullRequestComments[filePath][codeBlockId].push({
-            id: comment.id,
-            author: comment.author,
-            comment: comment.body,
-            updatedAt: comment.updatedAt,
-          });
-        });
-      });
-    });
+    await this.loadPullRequestData();
+    this.loadingPr = false;
   },
 };
 
