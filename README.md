@@ -54,7 +54,7 @@ When the migration ends, you can now access Koopera at: [http://0.0.0.0:8080](ht
 
 ## Dependencies
 * Python 3.6
-* nodejs 10
+* nodejs 16
 
 ## Setting up backend for local development
 

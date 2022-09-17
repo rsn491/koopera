@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.8-nodejs13
+FROM nikolaik/python-nodejs:python3.6-nodejs16
 
 MAINTAINER Ricardo Neves "rsn_4_91@hotmail.com"
 
@@ -6,9 +6,10 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install -r requirements.txt gunicorn
+RUN pip install -r requirements.txt
 RUN npm install
 RUN npm run build
 
-EXPOSE 8080
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "run:app"]
+ENTRYPOINT [ "python" ]
+
+CMD ["run.py" ]
