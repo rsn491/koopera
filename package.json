@@ -36,7 +36,8 @@
       "vue/multi-word-component-names": "off",
       "no-underscore-dangle": "off",
       "comma-dangle": "off",
-      "no-alert": "off"
+      "no-alert": "off",
+      "linebreak-style": "off"
     },
     "parserOptions": {
       "parser": "@babel/eslint-parser"
