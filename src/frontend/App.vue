@@ -71,7 +71,7 @@ body {
   background-size: contain;
   background-position-x: center;
   background-repeat: no-repeat;
-  background-image: url(/img/icon.png);
+  background-image: url(/public/img/icon.png);
 }
 
 </style>
