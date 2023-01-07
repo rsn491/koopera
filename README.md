@@ -3,9 +3,6 @@ Koopera
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/rsn491/koopera)
 ![Frontend CI](https://github.com/rsn491/koopera/workflows/Frontend%20CI/badge.svg?branch=master)
 ![Backend CI](https://github.com/rsn491/koopera/workflows/Backend%20CI/badge.svg?branch=master)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/rsn491/koopera)](https://hub.docker.com/r/rsn491/koopera)
-[![dependencies Status](https://david-dm.org/rsn491/koopera/status.svg)](https://david-dm.org/rsn491/koopera)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/rsn491/koopera.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rsn491/koopera/alerts/)
 
 <img
   src="public/img/icon.png"
