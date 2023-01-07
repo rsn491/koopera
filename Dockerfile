@@ -1,6 +1,6 @@
 FROM nikolaik/python-nodejs:python3.6-nodejs16
 
-MAINTAINER Ricardo Neves "rsn_4_91@hotmail.com"
+LABEL org.opencontainers.image.authors="rsn_4_91@hotmail.com"
 
 WORKDIR /app
 
