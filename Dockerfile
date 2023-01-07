@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.6-nodejs16
+FROM nikolaik/python-nodejs:python3.8-nodejs16
 
 LABEL org.opencontainers.image.authors="rsn_4_91@hotmail.com"
 
