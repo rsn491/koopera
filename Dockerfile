@@ -15,6 +15,7 @@ WORKDIR /app
 
 COPY . /app
 
+RUN apt-get update && apt-get install -y libpq-dev python3-dev gcc && rm -rf /var/lib/apt/lists/*
 RUN pip install -r requirements.txt
 RUN npm install
 RUN npm run build
