@@ -1,6 +1,15 @@
-FROM nikolaik/python-nodejs:python3.8-nodejs16
+FROM python:3.13-slim
 
 LABEL org.opencontainers.image.authors="rsn_4_91@hotmail.com"
+
+# Install Node.js 20.x
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
