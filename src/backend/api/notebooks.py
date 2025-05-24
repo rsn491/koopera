@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, redirect, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from github import Github
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select, delete, and_
 from sqlalchemy.orm import sessionmaker
 
 from src.backend.config import DATABASE_URI
@@ -20,7 +20,8 @@ NOTEBOOKS_BLUEPRINT = Blueprint('notebooks', __name__)
 @jwt_required()
 def get_all_notebooks():
     session = SESSION()
-
+    stmt = select(Notebook)
+    notebooks_result = session.execute(stmt).scalars().all()
     return jsonify({
         "notebooks": list(
             map(
@@ -32,7 +33,7 @@ def get_all_notebooks():
                     'repoId': notebook.code_repo_id,
                     'repoName': notebook.code_repo.name
                 },
-                session.query(Notebook).all()))
+                notebooks_result))
     })
 
 
@@ -40,8 +41,7 @@ def get_all_notebooks():
 @jwt_required()
 def get_notebook(notebook_id):
     session = SESSION()
-
-    notebook = session.query(Notebook).get(int(notebook_id))
+    notebook = session.get(Notebook, int(notebook_id))
 
     if notebook is None:
         return jsonify({}), 404
@@ -55,8 +55,8 @@ def get_notebook(notebook_id):
 @jwt_required()
 def delete_notebook(notebook_id):
     session = SESSION()
-
-    session.query(Notebook).filter(Notebook.id == int(notebook_id)).delete()
+    stmt = delete(Notebook).where(Notebook.id == int(notebook_id))
+    session.execute(stmt)
     session.commit()
 
     return jsonify({})
@@ -71,46 +71,50 @@ def import_notebooks():
     github = Github(get_jwt_identity())
 
     if body and 'codeRepositories' in body:
-        code_repos = body['codeRepositories']
-        code_repos_ids = set(map(lambda repo: repo['id'], code_repos))
-        code_repos_owners = set(map(lambda repo: repo['owner'], code_repos))
+        code_repos_req = body['codeRepositories']
+        code_repos_ids = set(map(lambda repo: repo['id'], code_repos_req))
+        code_repos_owners = set(map(lambda repo: repo['owner'], code_repos_req))
     else:
         # no repos passed!
         # update notebooks for current repos
-        code_repos = session.query(CodeRepository).all()
-        code_repos_ids = set(map(lambda repo: repo.id, code_repos))
-        code_repos_owners = set(map(lambda repo: repo.owner, code_repos))
+        stmt_cr = select(CodeRepository)
+        code_repos_db = session.execute(stmt_cr).scalars().all()
+        code_repos_ids = set(map(lambda repo: repo.id, code_repos_db))
+        code_repos_owners = set(map(lambda repo: repo.owner, code_repos_db))
 
     notebooks_added = 0
     notebooks_updated = 0
 
     for owner in code_repos_owners:
-        notebooks = filter(
-            lambda notebook: notebook.repository.id in code_repos_ids,
+        # Assuming github.search_code returns objects with a .repository.id and .path, .sha, .name
+        # This part interacts with an external API (github.search_code) and its filtering logic remains unchanged.
+        notebooks_from_github = filter(
+            lambda nb_gh: nb_gh.repository.id in code_repos_ids,
             github.search_code(f'user:{owner} extension:ipynb'))
 
-        for notebook in notebooks:
-            notebook_db = session.query(Notebook).filter(
-                Notebook.path == notebook.path and
-                Notebook.code_repo_id == notebook.repository.id).first()
+        for notebook_gh in notebooks_from_github:
+            stmt_nb_check = select(Notebook).where(
+                and_(Notebook.path == notebook_gh.path,
+                     Notebook.code_repo_id == notebook_gh.repository.id)
+            )
+            notebook_db = session.execute(stmt_nb_check).scalar_one_or_none()
 
             if notebook_db:
-                notebook_db.sha = notebook.sha
+                notebook_db.sha = notebook_gh.sha
                 notebooks_updated += 1
             else:
-                if session.query(CodeRepository).get(
-                        notebook.repository.id) is None:
+                if session.get(CodeRepository, notebook_gh.repository.id) is None:
                     # create repo
                     session.add(
-                        CodeRepository(id=notebook.repository.id,
-                                       name=notebook.repository.name,
+                        CodeRepository(id=notebook_gh.repository.id,
+                                       name=notebook_gh.repository.name,
                                        owner=owner))
 
                 session.add(
-                    Notebook(code_repo_id=notebook.repository.id,
-                             sha=notebook.sha,
-                             path=notebook.path,
-                             title=notebook.name,
+                    Notebook(code_repo_id=notebook_gh.repository.id,
+                             sha=notebook_gh.sha,
+                             path=notebook_gh.path,
+                             title=notebook_gh.name,
                              summary=''))
                 notebooks_added += 1
 
