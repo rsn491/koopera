@@ -1,0 +1,57 @@
+name: Python Integration Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    services:
+      # Service to run the Flask application
+      # The Dockerfile should expose the port (e.g., 5000)
+      # If no Dockerfile is set up to run the app, this part needs adjustment
+      # or the app needs to be run as a background process in a step.
+      # For now, assuming `python run.py` starts the server on port 5000.
+      # This might need to be simpler if Docker isn't used for the app run in CI.
+      # Let's try running it directly first.
+
+    strategy:
+      matrix:
+        python-version: ['3.9'] # Using a common recent Python version
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Start Flask application in background
+      # This assumes run.py starts a server on http://localhost:5000
+      # and that it's the correct way to run the app.
+      # The output of run.py should not block.
+      # If it blocks, add ' > /dev/null 2>&1 &' to run in background
+      run: |
+        python run.py &
+        sleep 5 # Give the server a moment to start
+
+    - name: Run integration tests
+      env:
+        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        # Ensure the BASE_URL in test_api.py matches how the app is run.
+        # If run.py uses a different host/port, tests might fail.
+      run: |
+        pytest tests/integration/test_api.py
+
+    # No explicit stop step for the python run.py & process, 
+    # as the job container will be torn down, terminating the process.
